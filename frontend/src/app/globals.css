@@ -1,0 +1,169 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+@theme {
+  --font-heading: "Road Radio", var(--font-space-grotesk), sans-serif;
+  --font-body: "Gotham Medium", var(--font-manrope), sans-serif;
+}
+
+/* Archivos pendientes de agregar en public/fonts/ */
+@font-face {
+  font-family: "Road Radio";
+  src: url("/fonts/RoadRadio-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gotham Medium";
+  src: url("/fonts/GothamMedium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --background: #F2F3EE;
+  --foreground: #425051;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+@keyframes paso-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-paso-entrada {
+  animation: paso-entrada 0.22s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-paso-entrada {
+    animation: none;
+  }
+}
+
+@keyframes flotar {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+.animate-flotar {
+  animation: flotar 4.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flotar {
+    animation: none;
+  }
+}
+
+@keyframes entrada-suave {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-entrada {
+  animation: entrada-suave 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-entrada {
+    animation: none;
+  }
+}
+
+@keyframes flotar-suave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-flotar-suave {
+  animation: flotar-suave 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flotar-suave {
+    animation: none;
+  }
+}
+
+@keyframes pulso-suave {
+  0%,
+  100% {
+    box-shadow: 0 10px 20px -6px rgba(254, 40, 0, 0.25);
+  }
+  50% {
+    box-shadow: 0 12px 28px -6px rgba(254, 40, 0, 0.45);
+  }
+}
+
+.animate-pulso {
+  animation: pulso-suave 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulso {
+    animation: none;
+  }
+}
+
+@keyframes girar-lento {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-girar-lento {
+  animation: girar-lento 90s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-girar-lento {
+    animation: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
