@@ -1,0 +1,7 @@
+{
+  "name": "diagnostico-pista8",
+  "private": true,
+  "scripts": {
+    "emulators": "firebase emulators:start --only firestore,auth --export-on-exit=./.emulator-data --import=./.emulator-data"
+  }
+}

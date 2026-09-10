@@ -1,0 +1,388 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --gris-oscuro:#425051; --rojo-brillante:#FE2800; --gris-medio:#676E69;
+    --naranja:#FF8C12; --rojo-oscuro:#BE1E2D; --azul:#00344C; --gris-verde:#A4A49B; --off-white:#F2F3EE;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .app{font-family:'Manrope','Gotham Medium',sans-serif; background:var(--off-white); color:var(--gris-oscuro); min-height:100%; width:100%; position:relative;}
+  h1,h2,h3{font-family:'Space Grotesk','Road Radio',sans-serif; font-weight:700; letter-spacing:-0.02em; margin:0;}
+  a{color:var(--rojo-brillante); text-decoration:none;}
+  .header{position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid rgba(164,164,155,0.35);}
+  .header-inner{max-width:1320px; margin:0 auto; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{width:34px; height:34px; flex-shrink:0;}
+  .brand-text{display:flex; flex-direction:column; line-height:1.05;}
+  .brand-text .l1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--gris-oscuro); letter-spacing:0.01em;}
+  .brand-text .l2{font-size:9px; font-weight:600; letter-spacing:0.08em; color:var(--gris-medio); text-transform:uppercase;}
+  .brand-text .l2 span{color:var(--rojo-brillante);}
+  .btn-outline{border:1px solid var(--gris-oscuro); color:var(--gris-oscuro); border-radius:999px; padding:9px 18px; font-size:13px; font-weight:600; background:transparent; display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-family:inherit;}
+  .btn-outline:hover{background:var(--gris-oscuro); color:var(--off-white);}
+  .tabs{max-width:1320px; margin:0 auto; padding:0 32px; display:flex; gap:28px; border-bottom:1px solid rgba(164,164,155,0.35); background:#fff;}
+  .tab{padding:14px 2px; font-size:14px; font-weight:600; color:var(--gris-medio); border-bottom:2px solid transparent; cursor:pointer; background:none; border-left:none; border-right:none; border-top:none; font-family:inherit;}
+  .tab.active{color:var(--rojo-brillante); border-bottom-color:var(--rojo-brillante);}
+  main{max-width:1320px; margin:0 auto; padding:28px 32px 64px; display:flex; flex-direction:column; gap:18px;}
+  .page-title h1{font-size:26px; color:var(--gris-oscuro);}
+  .page-title p{margin:2px 0 0; font-size:13px; color:var(--gris-medio);}
+  .search{position:relative; max-width:340px;}
+  .search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gris-medio); pointer-events:none;}
+  .search input{width:100%; border:1px solid var(--gris-medio); border-radius:10px; padding:10px 12px 10px 36px; font-size:13.5px; color:var(--gris-oscuro); outline:none; font-family:inherit; background:#fff;}
+  .search input:focus{border-color:var(--azul); box-shadow:0 0 0 3px rgba(0,52,76,0.12);}
+  .table-card{background:#fff; border:1px solid rgba(164,164,155,0.4); border-radius:16px; overflow:hidden;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  thead th{text-align:left; padding:13px 18px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--gris-medio); background:var(--off-white); border-bottom:1px solid rgba(164,164,155,0.35);}
+  tbody tr{border-top:1px solid rgba(164,164,155,0.25); cursor:pointer;}
+  tbody tr:hover{background:rgba(254,40,0,0.045);}
+  tbody td{padding:13px 18px; color:var(--gris-oscuro); vertical-align:middle;}
+  .score-chip{display:inline-block; font-weight:700; color:var(--rojo-brillante); font-variant-numeric:tabular-nums;}
+  .fecha{display:flex; flex-direction:column; gap:1px;}
+  .fecha .d{font-size:13px; color:var(--gris-oscuro);}
+  .fecha .h{font-size:11.5px; color:var(--gris-medio); font-variant-numeric:tabular-nums;}
+  .row-end{display:flex; align-items:center; justify-content:flex-end; color:var(--gris-verde);}
+  .empty{padding:40px; text-align:center; color:var(--gris-medio); font-size:13.5px;}
+
+  .overlay{position:fixed; inset:0; background:rgba(66,80,81,0.55); display:flex; align-items:center; justify-content:center; padding:24px; z-index:50;}
+  .modal{background:#fff; border-radius:20px; width:100%; max-width:860px; max-height:88vh; overflow-y:auto; padding:28px 30px;}
+  .modal-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px;}
+  .modal-head .empresa-name{font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--gris-medio); font-weight:700;}
+  .modal-head h2{font-size:22px; color:var(--gris-oscuro); margin-top:2px;}
+  .modal-score{font-family:'Space Grotesk',sans-serif; font-size:34px; font-weight:700; color:var(--rojo-brillante); line-height:1;}
+  .modal-score span{font-size:14px; color:var(--gris-medio); font-weight:600;}
+  .close-btn{border:none; background:var(--off-white); color:var(--gris-oscuro); width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .close-btn:hover{background:var(--gris-verde); color:var(--off-white);}
+  .modal-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;}
+  .modal-card{background:var(--off-white); border-radius:14px; padding:16px;}
+  .modal-card h3{font-size:13px; color:var(--gris-oscuro); margin-bottom:10px;}
+  .niveles-list{display:flex; flex-direction:column; gap:8px;}
+  .nivel-row{display:flex; align-items:center; justify-content:space-between; font-size:12.5px;}
+  .nivel-row .dim{color:var(--gris-oscuro); font-weight:600;}
+  .nivel-badge{font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px;}
+  .ctx-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px;}
+  .ctx-item{background:var(--off-white); border-radius:10px; padding:10px 12px;}
+  .ctx-item .l{font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--gris-medio); font-weight:700;}
+  .ctx-item .v{font-size:12.5px; color:var(--gris-oscuro); font-weight:600; margin-top:3px;}
+  .qw-list{display:flex; flex-direction:column; gap:8px;}
+  .qw-item{background:var(--off-white); border-radius:10px; padding:10px 12px; font-size:13px; color:var(--gris-oscuro);}
+  .axis-label{font-size:10.5px; fill:var(--gris-medio); font-weight:600;}
+</style>
+</helmet>
+
+<div class="app">
+  <div class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+          <path d="M20 3 L32 30 L20 24 L8 30 Z" fill="#FE2800"/>
+          <rect x="14" y="33" width="3" height="5" fill="#425051"/>
+          <rect x="18.5" y="33" width="3" height="5" fill="#425051"/>
+          <rect x="23" y="33" width="3" height="5" fill="#425051"/>
+        </svg>
+        <div class="brand-text">
+          <span class="l1">CORPORATE INNOVATION</span>
+          <span class="l2">Powered by <span>Pista8</span></span>
+        </div>
+      </div>
+      <button type="button" class="btn-outline">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar Sesión
+      </button>
+    </div>
+    <div class="tabs">
+      <button type="button" class="tab">Resumen general</button>
+      <button type="button" class="tab active">Registros</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="page-title">
+      <h1>Registros</h1>
+      <p>{{ totalFiltrado }} diagnósticos · haz clic en una fila para ver el detalle completo.</p>
+    </div>
+
+    <label class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Filtrar por nombre de empresa..." value="{{ busqueda }}" onChange="{{ onBuscar }}">
+    </label>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Empresa</th><th>Contacto</th><th>Sector</th><th>Score</th><th>Arquetipo</th><th>Fecha y hora</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ registros }}" as="r" hint-placeholder-count="12">
+            <tr onClick="{{ r.abrir }}">
+              <td>{{ r.empresa }}</td>
+              <td>{{ r.contacto }}</td>
+              <td>{{ r.sector }}</td>
+              <td class="score-chip">{{ r.scoreLabel }}</td>
+              <td>{{ r.arquetipo }}</td>
+              <td>
+                <div class="fecha">
+                  <span class="d">{{ r.fechaLabel }}</span>
+                  <span class="h">{{ r.horaLabel }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="row-end">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <sc-if value="{{ sinResultados }}" hint-placeholder-val="{{ false }}">
+        <div class="empty">No hay diagnósticos que coincidan con la búsqueda.</div>
+      </sc-if>
+    </div>
+  </main>
+
+  <sc-if value="{{ modalAbierto }}" hint-placeholder-val="{{ false }}">
+    <div class="overlay" onClick="{{ cerrarModal }}">
+      <div class="modal" onClick="{{ detenerPropagacion }}">
+        <div class="modal-head">
+          <div>
+            <div class="empresa-name">{{ sel.sector }} · {{ sel.tamano }}</div>
+            <h2>{{ sel.empresa }}</h2>
+          </div>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="text-align:right;">
+              <div class="modal-score">{{ sel.scoreLabel }}<span>/100</span></div>
+              <div style="font-size:12px; color:var(--gris-medio); font-weight:600;">{{ sel.arquetipo }}</div>
+            </div>
+            <button type="button" class="close-btn" onClick="{{ cerrarModal }}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-grid">
+          <div class="modal-card">
+            <h3>Perfil por dimensión</h3>
+            <svg viewBox="0 0 220 210" width="100%" style="max-height:210px;">
+              <sc-for list="{{ sel.radarRings }}" as="ring" hint-placeholder-count="4">
+                <polygon points="{{ ring.points }}" fill="none" stroke="#E7E7E1" stroke-width="1"/>
+              </sc-for>
+              <sc-for list="{{ sel.radarAxes }}" as="axis" hint-placeholder-count="6">
+                <line x1="{{ axis.cx }}" y1="{{ axis.cy }}" x2="{{ axis.x }}" y2="{{ axis.y }}" stroke="#E7E7E1" stroke-width="1"/>
+                <text x="{{ axis.lx }}" y="{{ axis.ly }}" text-anchor="{{ axis.anchor }}" class="axis-label">{{ axis.label }}</text>
+              </sc-for>
+              <polygon points="{{ sel.radarDataPoints }}" fill="rgba(254,40,0,0.22)" stroke="#FE2800" stroke-width="2"/>
+            </svg>
+          </div>
+
+          <div class="modal-card">
+            <h3>Nivel por dimensión</h3>
+            <div class="niveles-list">
+              <sc-for list="{{ sel.niveles }}" as="n" hint-placeholder-count="6">
+                <div class="nivel-row">
+                  <span class="dim">{{ n.dim }}</span>
+                  <span class="nivel-badge" style="background:{{ n.color }}; color:{{ n.textColor }};">{{ n.nivel }} · {{ n.valor }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-card" style="margin-bottom:20px;">
+          <h3>Contexto declarado</h3>
+          <div class="ctx-grid">
+            <sc-for list="{{ sel.contexto }}" as="c" hint-placeholder-count="8">
+              <div class="ctx-item">
+                <div class="l">{{ c.etiqueta }}</div>
+                <div class="v">{{ c.valor }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div class="modal-card">
+          <h3>Quick wins recomendados · {{ sel.dimensionCriticaLabel }}</h3>
+          <div class="qw-list">
+            <sc-for list="{{ sel.quickWins }}" as="qw" hint-placeholder-count="3">
+              <div class="qw-item">{{ qw }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script data-dc-script>
+const DIM_KEYS = ["cultura","equipos","proyectos","toma_decisiones","colaboracion_externa","estrategia_portafolio"];
+const DIM_LABELS = ["Cultura","Equipos","Proyectos","Toma de\nDecisiones","Colaboración\nExterna","Estrategia &\nPortafolio"];
+const OBSTACULOS = ["Falta de tiempo y foco directivo","Resistencia al cambio cultural","Presupuesto limitado para innovación","Falta de talento especializado","Silos entre áreas y falta de colaboración"];
+const PRIORIDADES = ["Mejorar la experiencia del cliente","Optimizar procesos internos","Lanzar nuevos productos o servicios","Adoptar tecnología digital","Fortalecer alianzas externas"];
+const IMPACTOS = ["Aumento de ingresos","Reducción de costos","Diversificación de ingresos","Mejora de eficiencia operativa","Acceso a nuevos mercados"];
+const HORIZONTES = ["0-6 meses","6-12 meses","12-24 meses"];
+const FOCOS = ["Eficiencia operativa","Nuevos productos","Experiencia del cliente","Sostenibilidad","Transformación digital","Expansión de mercado"];
+const RELACIONES = ["Decisor directo","Influye en la decisión","Ejecutor"];
+const PLAYBOOK = {
+  cultura: ["Instalar desafíos internos orientados a problemas","Activar champions de innovación","Diseñar incentivos para experimentación"],
+  equipos: ["Crear equipo núcleo con ownership claro","Definir roles para innovación transversal","Fortalecer capacidades en métodos ágiles"],
+  proyectos: ["Diseñar pipeline de pilotos","Implementar lógica de experimentación","Medir aprendizaje e impacto de iniciativas"],
+  toma_decisiones: ["Establecer comité ágil de innovación","Definir criterios de priorización","Reducir tiempos de decisión para pilotos"],
+  colaboracion_externa: ["Mapear y activar aliados estratégicos","Lanzar pilotos con actores externos","Diseñar mecanismo de innovación abierta"],
+  estrategia_portafolio: ["Definir focos estratégicos de innovación","Construir portafolio balanceado","Conectar innovación con crecimiento"],
+};
+
+const DIAGNOSTICOS = [
+  { empresa:"Andes Retail S.A.", contacto:"Contacto Demo 1", sector:"Retail", tamano:"Mediana", fecha:"2026-09-07T09:14:00", dims:[3,3,3,1,3,3] },
+  { empresa:"Manufacturas del Sur Ltda.", contacto:"Contacto Demo 2", sector:"Manufactura", tamano:"Grande", fecha:"2026-09-04T16:42:00", dims:[3,3,3,1.3,3,3] },
+  { empresa:"Grupo Financiero Austral", contacto:"Contacto Demo 3", sector:"Servicios Financieros", tamano:"Corporativa", fecha:"2026-08-31T11:05:00", dims:[2.3,2.3,2.7,1,2.3,2.3] },
+  { empresa:"Logística Cordillera SpA", contacto:"Contacto Demo 4", sector:"Logística", tamano:"Mediana", fecha:"2026-09-08T13:27:00", dims:[3,3,3,3,3,1.3] },
+  { empresa:"Constructora Vientos Ltda.", contacto:"Contacto Demo 5", sector:"Construcción", tamano:"Grande", fecha:"2026-09-03T10:50:00", dims:[3.3,3.3,3.7,3.3,3,1.7] },
+  { empresa:"Textiles Patagonia", contacto:"Contacto Demo 6", sector:"Textil", tamano:"Mediana", fecha:"2026-08-28T15:18:00", dims:[2.3,2.7,2.3,1.3,2,2.3] },
+  { empresa:"Servicios Digitales Norte", contacto:"Contacto Demo 7", sector:"Tecnología", tamano:"Pequeña", fecha:"2026-09-06T08:47:00", dims:[3.3,3,2,3,2.3,3.3] },
+  { empresa:"Aseguradora Continental", contacto:"Contacto Demo 8", sector:"Seguros", tamano:"Grande", fecha:"2026-09-01T17:33:00", dims:[3.7,3,2.3,3,2.7,3.7] },
+  { empresa:"AgroTech Valle Central", contacto:"Contacto Demo 10", sector:"Agroindustria", tamano:"Mediana", fecha:"2026-09-05T12:09:00", dims:[3,1.7,3,3,3.7,3.3] },
+  { empresa:"Minera Altiplano S.A.", contacto:"Contacto Demo 11", sector:"Minería", tamano:"Corporativa", fecha:"2026-08-30T09:56:00", dims:[3,2,3.3,3,3.7,3.3] },
+  { empresa:"Editorial Horizonte", contacto:"Contacto Demo 13", sector:"Editorial", tamano:"Pequeña", fecha:"2026-09-02T14:22:00", dims:[1.7,2,2,2.3,2,1.7] },
+  { empresa:"Pista10", contacto:"Aaron Sendoya Baqueros", sector:"Tecnología", tamano:"Pequeña", fecha:"2026-09-09T18:05:00", dims:[2.3,2,1.7,2,1.3,2] },
+];
+
+function nivel(v){ return v>=3?"Alto":v>=2?"Medio":"Bajo"; }
+function nivelColor(n){ return n==="Alto"?"#00344C":n==="Medio"?"#FF8C12":"#BE1E2D"; }
+function nivelText(n){ return n==="Medio"?"#425051":"#F2F3EE"; }
+function scoreTotal(dims){
+  const avg = dims.reduce((a,b)=>a+b,0)/dims.length;
+  return Math.round((avg/4*100)*10)/10;
+}
+function dimensionCritica(dims){
+  let idx=0;
+  for(let i=1;i<dims.length;i++){ if(dims[i]<dims[idx]) idx=i; }
+  return idx;
+}
+function resolverArquetipo(dims){
+  const critIdx = dimensionCritica(dims);
+  const [cultura,,proyectos,,colab,estrategia] = dims;
+  if(critIdx===3) return "Innovación Bloqueada";
+  if(critIdx===5) return "Innovación Operativa";
+  if(cultura>=3 && estrategia>=3 && proyectos<2.5) return "Innovación Discursiva";
+  if(colab>=3 && estrategia>=3) return "Innovación Ecosistémica Emergente";
+  return "Innovación en Transición";
+}
+function polar(cx,cy,r,angleDeg){
+  const rad = (Math.PI/180)*angleDeg;
+  return { x: cx + r*Math.sin(rad), y: cy - r*Math.cos(rad) };
+}
+function pad2(n){ return String(n).padStart(2,"0"); }
+
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.state = { selectedIndex: null, busqueda: "" };
+  }
+
+  buildRadar(dims, cx, cy, R){
+    const radarRings = [0.25,0.5,0.75,1].map(f=>({
+      points: DIM_KEYS.map((_,i)=>{ const p=polar(cx,cy,R*f,i*60); return `${p.x},${p.y}`; }).join(" ")
+    }));
+    const radarAxes = DIM_KEYS.map((_,i)=>{
+      const angle=i*60;
+      const end = polar(cx,cy,R,angle);
+      const label = polar(cx,cy,R+26,angle);
+      let anchor = "middle";
+      if(label.x < cx-8) anchor="end";
+      else if(label.x > cx+8) anchor="start";
+      return { cx, cy, x:end.x, y:end.y, lx:label.x, ly:label.y+4, anchor, label: DIM_LABELS[i] };
+    });
+    const radarDataPoints = DIM_KEYS.map((_,i)=>{
+      const p = polar(cx,cy, (dims[i]/4)*R, i*60);
+      return `${p.x},${p.y}`;
+    }).join(" ");
+    return { radarRings, radarAxes, radarDataPoints };
+  }
+
+  renderVals(){
+    const busqueda = this.state.busqueda;
+    const termino = busqueda.trim().toLowerCase();
+
+    const enriched = DIAGNOSTICOS.map((d,i)=>{
+      const fecha = new Date(d.fecha);
+      return {
+        ...d,
+        idx:i,
+        score: scoreTotal(d.dims),
+        arquetipo: resolverArquetipo(d.dims),
+        critIdx: dimensionCritica(d.dims),
+        scoreLabel: scoreTotal(d.dims).toFixed(1).replace(/\.0$/,""),
+        fechaLabel: `${pad2(fecha.getDate())}/${pad2(fecha.getMonth()+1)}/${fecha.getFullYear()}`,
+        horaLabel: `${pad2(fecha.getHours())}:${pad2(fecha.getMinutes())}`,
+      };
+    });
+
+    const filtrados = enriched.filter(d => !termino || d.empresa.toLowerCase().includes(termino));
+
+    const registros = filtrados.map(d => ({
+      ...d,
+      abrir: () => this.setState({ selectedIndex: d.idx }),
+    }));
+
+    const onBuscar = (e) => this.setState({ busqueda: e.target.value });
+    const cerrarModal = () => this.setState({ selectedIndex: null });
+    const detenerPropagacion = (e) => e.stopPropagation();
+
+    let sel = null;
+    if(this.state.selectedIndex !== null){
+      const d = enriched[this.state.selectedIndex];
+      const radar = this.buildRadar(d.dims, 105, 100, 78);
+      const niveles = DIM_KEYS.map((_,i)=>({
+        dim: DIM_LABELS[i].replace("\n"," "),
+        valor: d.dims[i].toFixed(1),
+        nivel: nivel(d.dims[i]),
+        color: nivelColor(nivel(d.dims[i])),
+        textColor: nivelText(nivel(d.dims[i])),
+      }));
+      const critKey = DIM_KEYS[d.critIdx];
+      sel = {
+        ...d,
+        scoreLabel: d.score.toFixed(1).replace(/\.0$/,""),
+        ...radar,
+        niveles,
+        dimensionCriticaLabel: DIM_LABELS[d.critIdx].replace("\n"," "),
+        quickWins: PLAYBOOK[critKey],
+        contexto: [
+          { etiqueta:"Sector", valor: d.sector },
+          { etiqueta:"Tamaño", valor: d.tamano },
+          { etiqueta:"Relación con decisiones", valor: RELACIONES[d.idx % RELACIONES.length] },
+          { etiqueta:"Focos hoy", valor: FOCOS[d.idx % FOCOS.length] },
+          { etiqueta:"Principal obstáculo", valor: OBSTACULOS[d.idx % OBSTACULOS.length] },
+          { etiqueta:"Prioridad (12 meses)", valor: PRIORIDADES[d.idx % PRIORIDADES.length] },
+          { etiqueta:"Impacto buscado", valor: IMPACTOS[d.idx % IMPACTOS.length] },
+          { etiqueta:"Horizonte realista", valor: HORIZONTES[d.idx % HORIZONTES.length] },
+        ],
+      };
+    }
+
+    return {
+      registros,
+      totalFiltrado: filtrados.length,
+      sinResultados: filtrados.length === 0,
+      busqueda,
+      onBuscar,
+      modalAbierto: sel !== null,
+      sel: sel || {},
+      cerrarModal,
+      detenerPropagacion,
+    };
+  }
+}
+</script>
+</body>
+</html>

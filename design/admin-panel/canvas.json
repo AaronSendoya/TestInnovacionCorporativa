@@ -1,0 +1,11 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1500, "expand": "fill" },
+    { "file": "Registros.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 1000, "expand": "fill", "is_interactive": true }
+  ],
+  "annotations": [
+    { "id": "note-overview", "x": 0, "y": -90, "w": 420, "text": "Resumen general — vista agregada de todos los diagnósticos" },
+    { "id": "note-registros", "x": 1560, "y": -90, "w": 420, "text": "Registros — clic en una fila abre el detalle completo (prototipo funcional)" }
+  ],
+  "launch": { "view": "focused", "file": "Main.dc.html" }
+}

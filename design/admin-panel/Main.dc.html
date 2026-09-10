@@ -1,0 +1,416 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --gris-oscuro:#425051; --rojo-brillante:#FE2800; --gris-medio:#676E69;
+    --naranja:#FF8C12; --rojo-oscuro:#BE1E2D; --azul:#00344C; --gris-verde:#A4A49B; --off-white:#F2F3EE;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .app{font-family:'Manrope','Gotham Medium',sans-serif; background:var(--off-white); color:var(--gris-oscuro); min-height:100%; width:100%;}
+  h1,h2,h3{font-family:'Space Grotesk','Road Radio',sans-serif; font-weight:700; letter-spacing:-0.02em; margin:0;}
+  a{color:var(--rojo-brillante); text-decoration:none;}
+  a:hover{color:var(--rojo-oscuro);}
+  .header{position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid rgba(164,164,155,0.35);}
+  .header-inner{max-width:1320px; margin:0 auto; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{width:34px; height:34px; flex-shrink:0;}
+  .brand-text{display:flex; flex-direction:column; line-height:1.05;}
+  .brand-text .l1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--gris-oscuro); letter-spacing:0.01em;}
+  .brand-text .l2{font-size:9px; font-weight:600; letter-spacing:0.08em; color:var(--gris-medio); text-transform:uppercase;}
+  .brand-text .l2 span{color:var(--rojo-brillante);}
+  .btn-outline{border:1px solid var(--gris-oscuro); color:var(--gris-oscuro); border-radius:999px; padding:9px 18px; font-size:13px; font-weight:600; background:transparent; display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-family:inherit;}
+  .btn-outline:hover{background:var(--gris-oscuro); color:var(--off-white);}
+  .tabs{max-width:1320px; margin:0 auto; padding:0 32px; display:flex; gap:28px; border-bottom:1px solid rgba(164,164,155,0.35); background:#fff;}
+  .tab{padding:14px 2px; font-size:14px; font-weight:600; color:var(--gris-medio); border-bottom:2px solid transparent; cursor:pointer; background:none; border-left:none; border-right:none; border-top:none; font-family:inherit;}
+  .tab.active{color:var(--rojo-brillante); border-bottom-color:var(--rojo-brillante);}
+  main{max-width:1320px; margin:0 auto; padding:28px 32px 64px; display:flex; flex-direction:column; gap:22px;}
+  .page-title{display:flex; flex-direction:column; gap:4px; margin-bottom:2px;}
+  .page-title h1{font-size:26px; color:var(--gris-oscuro);}
+  .page-title p{margin:0; font-size:13px; color:var(--gris-medio);}
+  .card{background:#fff; border:1px solid rgba(164,164,155,0.4); border-radius:16px; padding:22px;}
+  .card h2{font-size:16px; color:var(--gris-oscuro); margin-bottom:2px;}
+  .card .sub{font-size:12px; color:var(--gris-medio); margin:2px 0 16px;}
+  .grid-4{display:grid; grid-template-columns:1.1fr 0.9fr 0.9fr 0.9fr; gap:18px;}
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .stat{display:flex; flex-direction:column; gap:6px; justify-content:center;}
+  .stat .label{font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--gris-medio); font-weight:700;}
+  .stat .value{font-size:30px; font-weight:700; font-family:'Space Grotesk',sans-serif; color:var(--gris-oscuro); line-height:1;}
+  .stat .hint{font-size:12px; color:var(--gris-medio);}
+  .stat .chip{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--rojo-brillante); background:rgba(254,40,0,0.08); border-radius:999px; padding:4px 10px; width:fit-content;}
+  .legend{display:flex; align-items:center; gap:16px; font-size:12px; color:var(--gris-medio); margin-top:14px; flex-wrap:wrap;}
+  .legend-item{display:flex; align-items:center; gap:6px;}
+  .legend-dot{width:10px; height:10px; border-radius:3px; display:inline-block;}
+  .bar-row{display:flex; align-items:center; gap:12px; padding:7px 0;}
+  .bar-label{width:190px; flex-shrink:0; font-size:12.5px; color:var(--gris-oscuro); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .bar-track{flex:1; height:14px; background:var(--off-white); border-radius:7px; position:relative; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:7px;}
+  .bar-value{width:42px; text-align:right; font-size:12.5px; font-weight:700; color:var(--gris-oscuro); font-variant-numeric:tabular-nums;}
+  .heatmap-scroll{overflow-x:auto;}
+  .heatmap{border-collapse:separate; border-spacing:4px; width:100%;}
+  .heatmap th{font-size:10.5px; font-weight:700; color:var(--gris-medio); text-transform:uppercase; letter-spacing:0.03em; padding:0 4px 6px; text-align:center;}
+  .heatmap th.row-h{text-align:left;}
+  .heatmap td.row-h{font-size:12px; font-weight:600; color:var(--gris-oscuro); padding:0 10px 0 0; white-space:nowrap;}
+  .heat-cell{width:52px; height:30px; border-radius:6px; text-align:center; font-size:11.5px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .quadrant-label{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; fill:var(--gris-medio);}
+  .axis-label{font-size:11px; fill:var(--gris-medio); font-weight:600;}
+  .scatter-name{font-size:11px; fill:var(--gris-oscuro); font-weight:700;}
+</style>
+</helmet>
+
+<div class="app">
+  <div class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+          <path d="M20 3 L32 30 L20 24 L8 30 Z" fill="#FE2800"/>
+          <rect x="14" y="33" width="3" height="5" fill="#425051"/>
+          <rect x="18.5" y="33" width="3" height="5" fill="#425051"/>
+          <rect x="23" y="33" width="3" height="5" fill="#425051"/>
+        </svg>
+        <div class="brand-text">
+          <span class="l1">CORPORATE INNOVATION</span>
+          <span class="l2">Powered by <span>Pista8</span></span>
+        </div>
+      </div>
+      <button type="button" class="btn-outline">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar Sesión
+      </button>
+    </div>
+    <div class="tabs">
+      <button type="button" class="tab active">Resumen general</button>
+      <button type="button" class="tab">Registros</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="page-title">
+      <h1>Resumen general</h1>
+      <p>Vista agregada de los {{ totalDiagnosticos }} diagnósticos de innovación registrados.</p>
+    </div>
+
+    <div class="grid-4">
+      <div class="card" style="display:flex; align-items:center; gap:18px;">
+        <svg width="140" height="86" viewBox="0 0 200 120">
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#E7E7E1" stroke-width="18" stroke-linecap="round"/>
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#FE2800" stroke-width="18" stroke-linecap="round" pathLength="100" stroke-dasharray="{{ madurezPromedio }} 100"/>
+        </svg>
+        <div class="stat">
+          <span class="label">Madurez promedio</span>
+          <span class="value">{{ madurezPromedio }}<span style="font-size:15px; color:var(--gris-medio); font-weight:600;">/100</span></span>
+          <span class="hint">Innovación en Transición (promedio)</span>
+        </div>
+      </div>
+      <div class="card stat">
+        <span class="label">Diagnósticos</span>
+        <span class="value">{{ totalDiagnosticos }}</span>
+        <span class="hint">{{ empresasUnicas }} empresas evaluadas</span>
+      </div>
+      <div class="card stat">
+        <span class="label">Arquetipo más frecuente</span>
+        <span class="value" style="font-size:19px;">{{ arquetipoFrecuente }}</span>
+        <span class="chip">{{ arquetipoFrecuentePct }}% de los casos</span>
+      </div>
+      <div class="card stat">
+        <span class="label">Dimensión más crítica</span>
+        <span class="value" style="font-size:19px;">Toma de Decisiones</span>
+        <span class="hint">Bloqueador en 4 de 12 empresas</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>Perfil promedio por dimensión</h2>
+        <p class="sub">Score promedio (0–4) de las 6 dimensiones, todas las empresas.</p>
+        <svg viewBox="0 0 280 260" width="100%" style="max-height:280px;">
+          <sc-for list="{{ radarRings }}" as="ring" hint-placeholder-count="4">
+            <polygon points="{{ ring.points }}" fill="none" stroke="#E7E7E1" stroke-width="1"/>
+          </sc-for>
+          <sc-for list="{{ radarAxes }}" as="axis" hint-placeholder-count="6">
+            <line x1="{{ axis.cx }}" y1="{{ axis.cy }}" x2="{{ axis.x }}" y2="{{ axis.y }}" stroke="#E7E7E1" stroke-width="1"/>
+            <text x="{{ axis.lx }}" y="{{ axis.ly }}" text-anchor="{{ axis.anchor }}" class="axis-label">{{ axis.label }}</text>
+          </sc-for>
+          <polygon points="{{ radarDataPoints }}" fill="rgba(254,40,0,0.22)" stroke="#FE2800" stroke-width="2"/>
+          <sc-for list="{{ radarDots }}" as="dot" hint-placeholder-count="6">
+            <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="3.5" fill="#FE2800"/>
+          </sc-for>
+        </svg>
+      </div>
+
+      <div class="card">
+        <h2>Mapa de calor: empresa × dimensión</h2>
+        <p class="sub">Nivel por dimensión de cada diagnóstico (detecta patrones y focos de riesgo).</p>
+        <div class="heatmap-scroll">
+          <table class="heatmap">
+            <thead>
+              <tr>
+                <th class="row-h">Empresa</th>
+                <th>Cul</th><th>Equ</th><th>Pro</th><th>TDe</th><th>ColE</th><th>EstP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ heatmapRows }}" as="row" hint-placeholder-count="12">
+                <tr>
+                  <td class="row-h">{{ row.empresa }}</td>
+                  <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="6">
+                    <td>
+                      <div class="heat-cell" style="background:{{ cell.bg }}; color:{{ cell.fg }};">{{ cell.valor }}</div>
+                    </td>
+                  </sc-for>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#00344C;"></span>Alto (≥3)</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#FF8C12;"></span>Medio (2–3)</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#BE1E2D;"></span>Bajo (&lt;2)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>Ranking de empresas</h2>
+        <p class="sub">Score total (0–100), de mayor a menor madurez.</p>
+        <div>
+          <sc-for list="{{ rankingEmpresas }}" as="fila" hint-placeholder-count="12">
+            <div class="bar-row">
+              <span class="bar-label">{{ fila.empresa }}</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:{{ fila.pct }}%; background:{{ fila.color }};"></div>
+              </div>
+              <span class="bar-value">{{ fila.score }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Distribución por arquetipo</h2>
+        <p class="sub">Cantidad de empresas por arquetipo asignado.</p>
+        <div>
+          <sc-for list="{{ distribucionArquetipos }}" as="fila" hint-placeholder-count="5">
+            <div class="bar-row">
+              <span class="bar-label" style="width:210px;">{{ fila.arquetipo }}</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:{{ fila.pct }}%; background:{{ fila.color }};"></div>
+              </div>
+              <span class="bar-value">{{ fila.cantidad }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Evolución temporal</h2>
+      <p class="sub">Score total por diagnóstico enviado, en orden cronológico (últimas 2 semanas).</p>
+      <svg viewBox="0 0 760 220" width="100%" style="max-height:220px;">
+        <sc-for list="{{ lineGrid }}" as="g" hint-placeholder-count="5">
+          <line x1="20" y1="{{ g.y }}" x2="740" y2="{{ g.y }}" stroke="#EEEEE8" stroke-width="1"/>
+          <text x="6" y="{{ g.ly }}" class="axis-label">{{ g.label }}</text>
+        </sc-for>
+        <polyline points="{{ lineaPuntos }}" fill="none" stroke="#FE2800" stroke-width="2.5"/>
+        <sc-for list="{{ lineaDots }}" as="p" hint-placeholder-count="12">
+          <circle cx="{{ p.x }}" cy="{{ p.y }}" r="4" fill="#FE2800" stroke="#fff" stroke-width="1.5"/>
+        </sc-for>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h2>Matriz de prioridad por dimensión</h2>
+      <p class="sub">Impacto (frecuencia como dimensión crítica) vs. esfuerzo estimado para intervenir. Datos ilustrativos.</p>
+      <svg viewBox="0 0 460 300" width="100%" style="max-height:300px;">
+        <line x1="40" y1="20" x2="40" y2="260" stroke="#D8D8D0" stroke-width="1"/>
+        <line x1="40" y1="260" x2="440" y2="260" stroke="#D8D8D0" stroke-width="1"/>
+        <line x1="240" y1="20" x2="240" y2="260" stroke="#EEEEE8" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="40" y1="140" x2="440" y2="140" stroke="#EEEEE8" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="240" y="14" text-anchor="middle" class="quadrant-label">Alto esfuerzo →</text>
+        <text x="10" y="140" text-anchor="middle" class="quadrant-label" transform="rotate(-90 10 140)">Alto impacto →</text>
+        <text x="60" y="38" class="quadrant-label">Quick wins</text>
+        <text x="330" y="38" class="quadrant-label">Proyectos mayores</text>
+        <text x="60" y="252" class="quadrant-label">Relleno</text>
+        <text x="330" y="252" class="quadrant-label">Baja prioridad</text>
+        <sc-for list="{{ matrizPuntos }}" as="pt" hint-placeholder-count="6">
+          <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="7" fill="#FE2800" stroke="#fff" stroke-width="2"/>
+          <text x="{{ pt.lx }}" y="{{ pt.ly }}" class="scatter-name" text-anchor="{{ pt.anchor }}">{{ pt.label }}</text>
+        </sc-for>
+      </svg>
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script data-dc-script>
+const DIAGNOSTICOS = [
+  { empresa:"Andes Retail S.A.", contacto:"Contacto Demo 1", sector:"Retail", tamano:"Mediana", fecha:"2026-09-07T09:14:00", dims:[3,3,3,1,3,3] },
+  { empresa:"Manufacturas del Sur Ltda.", contacto:"Contacto Demo 2", sector:"Manufactura", tamano:"Grande", fecha:"2026-09-04T16:42:00", dims:[3,3,3,1.3,3,3] },
+  { empresa:"Grupo Financiero Austral", contacto:"Contacto Demo 3", sector:"Servicios Financieros", tamano:"Corporativa", fecha:"2026-08-31T11:05:00", dims:[2.3,2.3,2.7,1,2.3,2.3] },
+  { empresa:"Logística Cordillera SpA", contacto:"Contacto Demo 4", sector:"Logística", tamano:"Mediana", fecha:"2026-09-08T13:27:00", dims:[3,3,3,3,3,1.3] },
+  { empresa:"Constructora Vientos Ltda.", contacto:"Contacto Demo 5", sector:"Construcción", tamano:"Grande", fecha:"2026-09-03T10:50:00", dims:[3.3,3.3,3.7,3.3,3,1.7] },
+  { empresa:"Textiles Patagonia", contacto:"Contacto Demo 6", sector:"Textil", tamano:"Mediana", fecha:"2026-08-28T15:18:00", dims:[2.3,2.7,2.3,1.3,2,2.3] },
+  { empresa:"Servicios Digitales Norte", contacto:"Contacto Demo 7", sector:"Tecnología", tamano:"Pequeña", fecha:"2026-09-06T08:47:00", dims:[3.3,3,2,3,2.3,3.3] },
+  { empresa:"Aseguradora Continental", contacto:"Contacto Demo 8", sector:"Seguros", tamano:"Grande", fecha:"2026-09-01T17:33:00", dims:[3.7,3,2.3,3,2.7,3.7] },
+  { empresa:"AgroTech Valle Central", contacto:"Contacto Demo 10", sector:"Agroindustria", tamano:"Mediana", fecha:"2026-09-05T12:09:00", dims:[3,1.7,3,3,3.7,3.3] },
+  { empresa:"Minera Altiplano S.A.", contacto:"Contacto Demo 11", sector:"Minería", tamano:"Corporativa", fecha:"2026-08-30T09:56:00", dims:[3,2,3.3,3,3.7,3.3] },
+  { empresa:"Editorial Horizonte", contacto:"Contacto Demo 13", sector:"Editorial", tamano:"Pequeña", fecha:"2026-09-02T14:22:00", dims:[1.7,2,2,2.3,2,1.7] },
+  { empresa:"Pista10", contacto:"Aaron Sendoya Baqueros", sector:"Tecnología", tamano:"Pequeña", fecha:"2026-09-09T18:05:00", dims:[2.3,2,1.7,2,1.3,2] },
+];
+const DIM_KEYS = ["cultura","equipos","proyectos","toma_decisiones","colaboracion_externa","estrategia_portafolio"];
+const DIM_LABELS = ["Cultura","Equipos","Proyectos","Toma de\nDecisiones","Colaboración\nExterna","Estrategia &\nPortafolio"];
+
+function nivel(v){ return v>=3?"Alto":v>=2?"Medio":"Bajo"; }
+function nivelColor(n){ return n==="Alto"?"#00344C":n==="Medio"?"#FF8C12":"#BE1E2D"; }
+function nivelText(n){ return n==="Medio"?"#425051":"#F2F3EE"; }
+
+function scoreTotal(dims){
+  const avg = dims.reduce((a,b)=>a+b,0)/dims.length;
+  return Math.round((avg/4*100)*100)/100;
+}
+function dimensionCritica(dims){
+  let idx=0;
+  for(let i=1;i<dims.length;i++){ if(dims[i]<dims[idx]) idx=i; }
+  return idx;
+}
+function resolverArquetipo(dims){
+  const critIdx = dimensionCritica(dims);
+  const [cultura,equipos,proyectos,toma,colab,estrategia] = dims;
+  if(critIdx===3) return "Innovación Bloqueada";
+  if(critIdx===5) return "Innovación Operativa";
+  if(cultura>=3 && estrategia>=3 && proyectos<2.5) return "Innovación Discursiva";
+  if(colab>=3 && estrategia>=3) return "Innovación Ecosistémica Emergente";
+  return "Innovación en Transición";
+}
+
+function polar(cx,cy,r,angleDeg){
+  const rad = (Math.PI/180)*angleDeg;
+  return { x: cx + r*Math.sin(rad), y: cy - r*Math.cos(rad) };
+}
+
+class Component extends DCLogic {
+  renderVals(){
+    const enriched = DIAGNOSTICOS.map(d => ({
+      ...d,
+      score: scoreTotal(d.dims),
+      arquetipo: resolverArquetipo(d.dims),
+      critIdx: dimensionCritica(d.dims),
+    }));
+
+    const totalDiagnosticos = enriched.length;
+    const empresasUnicas = new Set(enriched.map(d=>d.empresa)).size;
+    const madurezPromedio = Math.round(enriched.reduce((a,d)=>a+d.score,0)/totalDiagnosticos);
+
+    const conteoArquetipos = {};
+    enriched.forEach(d=>{ conteoArquetipos[d.arquetipo] = (conteoArquetipos[d.arquetipo]||0)+1; });
+    const arquetiposOrdenados = Object.entries(conteoArquetipos).sort((a,b)=>b[1]-a[1]);
+    const arquetipoFrecuente = arquetiposOrdenados[0][0];
+    const arquetipoFrecuentePct = Math.round(arquetiposOrdenados[0][1]/totalDiagnosticos*100);
+    const maxArquetipo = arquetiposOrdenados[0][1];
+
+    const promediosDim = DIM_KEYS.map((_,i)=>{
+      const suma = enriched.reduce((a,d)=>a+d.dims[i],0);
+      return suma/enriched.length;
+    });
+
+    const cx=140, cy=125, R=95;
+    const radarRings = [0.25,0.5,0.75,1].map(f=>({
+      points: DIM_KEYS.map((_,i)=>{ const p=polar(cx,cy,R*f,i*60); return `${p.x},${p.y}`; }).join(" ")
+    }));
+    const radarAxes = DIM_KEYS.map((_,i)=>{
+      const angle=i*60;
+      const end = polar(cx,cy,R,angle);
+      const label = polar(cx,cy,R+34,angle);
+      let anchor = "middle";
+      if(label.x < cx-8) anchor="end";
+      else if(label.x > cx+8) anchor="start";
+      return { cx, cy, x:end.x, y:end.y, lx:label.x, ly:label.y+4, anchor, label: DIM_LABELS[i] };
+    });
+    const radarDataPoints = DIM_KEYS.map((_,i)=>{
+      const p = polar(cx,cy, (promediosDim[i]/4)*R, i*60);
+      return `${p.x},${p.y}`;
+    }).join(" ");
+    const radarDots = DIM_KEYS.map((_,i)=>{
+      const p = polar(cx,cy, (promediosDim[i]/4)*R, i*60);
+      return { x:p.x, y:p.y };
+    });
+
+    const heatmapRows = enriched.map(d=>({
+      empresa: d.empresa,
+      cells: d.dims.map(v=>{
+        const n = nivel(v);
+        return { valor: v.toFixed(1), bg: nivelColor(n), fg: nivelText(n) };
+      }),
+    }));
+
+    const maxScore = Math.max(...enriched.map(d=>d.score));
+    const rankingEmpresas = [...enriched].sort((a,b)=>b.score-a.score).map(d=>({
+      empresa: d.empresa,
+      score: Math.round(d.score*10)/10,
+      pct: Math.round((d.score/maxScore)*100),
+      color: "#FE2800",
+    }));
+
+    const distribucionArquetipos = arquetiposOrdenados.map(([nombre,cant])=>({
+      arquetipo: nombre,
+      cantidad: cant,
+      pct: Math.round((cant/maxArquetipo)*100),
+      color: "#425051",
+    }));
+
+    const ordenCronologico = [...enriched].sort((a,b)=> new Date(a.fecha) - new Date(b.fecha));
+    const chartW=760, chartH=220, padL=40, padR=20, padT=20, padB=30;
+    const innerW = chartW-padL-padR, innerH = chartH-padT-padB;
+    const lineaDots = ordenCronologico.map((d,i)=>{
+      const x = padL + (i/(ordenCronologico.length-1))*innerW;
+      const y = padT + innerH - (d.score/100)*innerH;
+      return { x, y };
+    });
+    const lineaPuntos = lineaDots.map(p=>`${p.x},${p.y}`).join(" ");
+    const lineGrid = [0,25,50,75,100].map(v=>({
+      y: padT + innerH - (v/100)*innerH,
+      ly: padT + innerH - (v/100)*innerH + 4,
+      label: String(v),
+    }));
+
+    const freqCritica = [0,0,0,0,0,0];
+    enriched.forEach(d=>{ freqCritica[d.critIdx]++; });
+    const puntosManuales = [
+      { impacto: 20, esfuerzo: 20 },
+      { impacto: 45, esfuerzo: 40 },
+      { impacto: 50, esfuerzo: 45 },
+      { impacto: 90, esfuerzo: 85 },
+      { impacto: 25, esfuerzo: 35 },
+      { impacto: 55, esfuerzo: 60 },
+    ];
+    const matrizPuntos = DIM_LABELS.map((label,i)=>{
+      const x = 40 + (puntosManuales[i].esfuerzo/100)*400;
+      const y = 260 - (puntosManuales[i].impacto/100)*240;
+      const anchor = x > 350 ? "end" : "start";
+      const lx = x + (anchor==="end" ? -12 : 12);
+      return { x, y, lx, ly:y+4, anchor, label: label.replace("\n"," ") };
+    });
+
+    return {
+      totalDiagnosticos, empresasUnicas, madurezPromedio,
+      arquetipoFrecuente, arquetipoFrecuentePct,
+      radarRings, radarAxes, radarDataPoints, radarDots,
+      heatmapRows, rankingEmpresas, distribucionArquetipos,
+      lineaPuntos, lineaDots, lineGrid,
+      matrizPuntos,
+    };
+  }
+}
+</script>
+</body>
+</html>
