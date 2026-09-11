@@ -36,12 +36,12 @@ export const ICONOS_DIMENSION: Record<string, LucideIcon> = {
 };
 
 export const ROL_DIMENSION: Record<string, string> = {
-  cultura: "Habilitador organizacional",
-  equipos: "Capacidad instalada",
-  proyectos: "Conversión: lleva a valor real",
-  toma_decisiones: "Velocidad y asignación: cuello crítico",
-  colaboracion_externa: "Escala y expansión",
-  estrategia_portafolio: "Dirección: define el para qué",
+  cultura: "Crea las condiciones para innovar",
+  equipos: "Aporta la capacidad para ejecutar",
+  proyectos: "Convierte ideas en resultados reales",
+  toma_decisiones: "Determina la velocidad para avanzar",
+  colaboracion_externa: "Escala la innovación con aliados externos",
+  estrategia_portafolio: "Da dirección y propósito a la innovación",
 };
 
 export const COLOR_NIVEL: Record<string, string> = {
@@ -55,6 +55,22 @@ export const CLASES_BADGE_NIVEL: Record<string, string> = {
   Medio: "bg-naranja/10 text-naranja",
   Bajo: "bg-rojo-oscuro/10 text-rojo-oscuro",
 };
+
+export const SEMAFORO_COLOR: Record<string, string> = {
+  Alto: "#16a34a",
+  Medio: "#f59e0b",
+  Bajo: "#ef4444",
+};
+
+// Une las etiquetas de una o mas dimensiones (empates) en un texto legible:
+// "Cultura", "Cultura y Equipos", "Cultura, Equipos y Proyectos".
+export function unirEtiquetasDimension(claves: string[]): string {
+  const nombres = claves.map((clave) => ETIQUETAS_DIMENSION[clave]);
+  if (nombres.length <= 1) {
+    return nombres[0] ?? "";
+  }
+  return `${nombres.slice(0, -1).join(", ")} y ${nombres[nombres.length - 1]}`;
+}
 
 interface AcentoColor {
   bg: string;

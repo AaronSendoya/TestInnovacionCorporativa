@@ -126,7 +126,7 @@ function nivelDeScore(score) {
   return "Bajo";
 }
 
-function calcularDiagnostico(perfil, empresa, contexto, respuestas, diasAtras) {
+function calcularDiagnostico(perfil, empresa, respuestas, diasAtras) {
   const scores = {};
   for (const dimension of Object.keys(DIMENSIONES_PREGUNTAS)) {
     const valores = respuestas[dimension];
@@ -171,7 +171,6 @@ function calcularDiagnostico(perfil, empresa, contexto, respuestas, diasAtras) {
   return {
     perfil,
     empresa,
-    contexto,
     scoresPorDimension: scores,
     nivelesPorDimension,
     scorePonderado,
@@ -188,52 +187,12 @@ function calcularDiagnostico(perfil, empresa, contexto, respuestas, diasAtras) {
   };
 }
 
-const CONTEXTOS = [
-  {
-    obstaculo: "Falta de tiempo y foco directivo",
-    prioridad: "Mejorar la experiencia del cliente",
-    impacto: "Aumento de ingresos",
-    horizonte: "6-12 meses",
-  },
-  {
-    obstaculo: "Resistencia al cambio cultural",
-    prioridad: "Optimizar procesos internos",
-    impacto: "Reducción de costos",
-    horizonte: "12-24 meses",
-  },
-  {
-    obstaculo: "Presupuesto limitado para innovación",
-    prioridad: "Lanzar nuevos productos o servicios",
-    impacto: "Diversificación de ingresos",
-    horizonte: "0-6 meses",
-  },
-  {
-    obstaculo: "Falta de talento especializado",
-    prioridad: "Adoptar tecnología digital",
-    impacto: "Mejora de eficiencia operativa",
-    horizonte: "12-24 meses",
-  },
-  {
-    obstaculo: "Silos entre áreas y falta de colaboración",
-    prioridad: "Fortalecer alianzas externas",
-    impacto: "Acceso a nuevos mercados",
-    horizonte: "6-12 meses",
-  },
-];
-
-const RELACIONES_DECISION = [
-  "Decisor directo",
-  "Influye en la decisión",
-  "Ejecutor",
-];
-
 const CASOS_MOCK = [
   // Innovación Bloqueada (toma_decisiones crítica)
   {
     empresa: {
       nombre: "Andes Retail S.A.",
       sector: "Retail",
-      tamano: "Grande",
       focos: ["Experiencia del cliente", "Eficiencia operativa"],
     },
     diasAtras: 2,
@@ -250,7 +209,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Manufacturas del Sur Ltda.",
       sector: "Manufactura",
-      tamano: "Mediana",
       focos: ["Eficiencia operativa"],
     },
     diasAtras: 5,
@@ -267,7 +225,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Grupo Financiero Austral",
       sector: "Servicios Financieros",
-      tamano: "Corporativa",
       focos: ["Transformación digital", "Nuevos productos"],
     },
     diasAtras: 9,
@@ -286,7 +243,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Logística Cordillera SpA",
       sector: "Logística",
-      tamano: "Mediana",
       focos: ["Eficiencia operativa"],
     },
     diasAtras: 1,
@@ -303,7 +259,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Constructora Vientos Ltda.",
       sector: "Construcción",
-      tamano: "Grande",
       focos: ["Sostenibilidad"],
     },
     diasAtras: 6,
@@ -320,7 +275,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Textiles Patagonia",
       sector: "Textil",
-      tamano: "Pequeña",
       focos: ["Nuevos productos", "Expansión de mercado"],
     },
     diasAtras: 12,
@@ -339,7 +293,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Servicios Digitales Norte",
       sector: "Tecnología",
-      tamano: "Mediana",
       focos: ["Transformación digital"],
     },
     diasAtras: 3,
@@ -356,7 +309,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Aseguradora Continental",
       sector: "Seguros",
-      tamano: "Grande",
       focos: ["Experiencia del cliente"],
     },
     diasAtras: 8,
@@ -373,7 +325,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Farmacéutica del Pacífico",
       sector: "Salud",
-      tamano: "Corporativa",
       focos: ["Nuevos productos", "Sostenibilidad"],
     },
     diasAtras: 15,
@@ -392,7 +343,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "AgroTech Valle Central",
       sector: "Agroindustria",
-      tamano: "Mediana",
       focos: ["Transformación digital", "Sostenibilidad"],
     },
     diasAtras: 4,
@@ -409,7 +359,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Minera Altiplano S.A.",
       sector: "Minería",
-      tamano: "Corporativa",
       focos: ["Sostenibilidad"],
     },
     diasAtras: 10,
@@ -426,7 +375,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "EnergíaViva Renovables",
       sector: "Energía",
-      tamano: "Grande",
       focos: ["Sostenibilidad", "Expansión de mercado"],
     },
     diasAtras: 18,
@@ -445,7 +393,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Editorial Horizonte",
       sector: "Editorial",
-      tamano: "Pequeña",
       focos: ["Nuevos productos"],
     },
     diasAtras: 7,
@@ -462,7 +409,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "TransportesUnidos Ltda.",
       sector: "Transporte",
-      tamano: "Mediana",
       focos: ["Eficiencia operativa"],
     },
     diasAtras: 14,
@@ -479,7 +425,6 @@ const CASOS_MOCK = [
     empresa: {
       nombre: "Hotelera Costa Azul",
       sector: "Turismo",
-      tamano: "Mediana",
       focos: ["Experiencia del cliente", "Expansión de mercado"],
     },
     diasAtras: 20,
@@ -498,21 +443,15 @@ async function main() {
   const batch = db.batch();
 
   CASOS_MOCK.forEach((caso, index) => {
-    const relacionDecisiones =
-      RELACIONES_DECISION[index % RELACIONES_DECISION.length];
     const perfil = {
       nombre: `Contacto Demo ${index + 1}`,
       email: `contacto${index + 1}@empresa-demo.cl`,
       cargo: "Gerente de Innovación",
-      relacion_decisiones: relacionDecisiones,
       ...(index % 5 !== 0 && {telefono: `+56 9 1234 ${1000 + index}`}),
     };
-    const contexto = CONTEXTOS[index % CONTEXTOS.length];
-
     const documento = calcularDiagnostico(
       perfil,
       caso.empresa,
-      contexto,
       caso.r,
       caso.diasAtras,
     );

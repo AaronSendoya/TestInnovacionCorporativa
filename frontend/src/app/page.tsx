@@ -14,20 +14,18 @@ const PASOS_PROCESO = [
   {
     numero: "01",
     titulo: "Responde el cuestionario",
-    descripcion:
-      "18 preguntas organizadas en 6 dimensiones clave. Toma menos de 10 minutos.",
+    descripcion: "En 10 minutos responde las 18 preguntas.",
   },
   {
     numero: "02",
-    titulo: "Recibe tu diagnóstico",
+    titulo: "Recibe un diagnóstico de la empresa",
     descripcion:
-      "Un score de madurez, tu arquetipo de innovación y tu perfil por dimensión.",
+      "El documento incluye score de madurez, arquetipo de innovación y perfil por dimensión.",
   },
   {
     numero: "03",
-    titulo: "Activa tu plan de acción",
-    descripcion:
-      "Quick Wins priorizados según tu dimensión crítica, listos para ejecutar.",
+    titulo: "Activa un plan de acción",
+    descripcion: "Identifica acciones concretas para desplegarlas.",
   },
 ];
 
@@ -114,7 +112,7 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
+      <section id="como-funciona" className="relative scroll-mt-24 overflow-hidden">
         <svg
           aria-hidden="true"
           className="animate-girar-lento pointer-events-none absolute -right-24 -top-20 origin-center opacity-[0.05]"
@@ -143,9 +141,9 @@ export default function Home() {
               className="animate-entrada font-heading text-5xl leading-[1.03] tracking-tight text-gris-oscuro sm:text-6xl"
               style={{ animationDelay: "80ms" }}
             >
-              ¿Qué tan lista está tu empresa para{" "}
+              Claridad absoluta para dar el siguiente {" "}
               <span className="relative whitespace-nowrap">
-                innovar
+                gran salto corporativo
                 <svg
                   aria-hidden="true"
                   className="absolute -bottom-2 left-0 w-full"
@@ -162,16 +160,13 @@ export default function Home() {
                   />
                 </svg>
               </span>
-              ?
             </h1>
 
             <p
               className="animate-entrada max-w-md text-lg leading-relaxed text-gris-medio"
               style={{ animationDelay: "160ms" }}
             >
-              Un diagnóstico de 18 preguntas que identifica tu arquetipo de
-              innovación, tus dimensiones críticas y los Quick Wins que debes
-              priorizar hoy.
+              Una visión clara para identificar oportunidades y tomar decisiones
             </p>
 
             <div
@@ -185,7 +180,7 @@ export default function Home() {
                 Comenzar diagnóstico →
               </Link>
               <span className="text-sm text-gris-medio">
-                10 min · Gratis · Resultados al instante
+                10 min · Resultados al instante
               </span>
             </div>
           </div>
@@ -204,62 +199,45 @@ export default function Home() {
                 </span>
               </div>
 
-              <div className="flex flex-col gap-6 px-8 py-8">
+              <div className="flex flex-col gap-5 px-8 py-8">
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-gris-medio">
-                    Tu score de madurez
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-gris-medio">
+                    Proceso
                   </span>
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="font-heading text-6xl text-rojo-brillante">
-                      <ContadorNumero valorFinal={78} />
-                    </span>
-                    <span className="text-lg text-gris-verde">/ 100</span>
-                  </div>
-                  <span className="mt-3 inline-block rounded-full bg-azul/8 px-3.5 py-1.5 text-sm font-semibold text-azul">
-                    Innovación Ecosistémica Emergente
-                  </span>
+                  <h2 className="mt-1 font-heading text-2xl leading-tight text-gris-oscuro">
+                    Cómo funciona el diagnóstico
+                  </h2>
                 </div>
 
-                <svg
-                  aria-hidden="true"
-                  className="w-full"
-                  height="190"
-                  viewBox="0 0 240 190"
-                >
-                  <polygon
-                    points="120,8 218,66 186,178 54,178 22,66"
-                    fill="none"
-                    stroke="#EDEEE8"
-                    strokeWidth="1"
-                  />
-                  <polygon
-                    points="120,46 178,80 158,146 82,146 62,80"
-                    fill="none"
-                    stroke="#EDEEE8"
-                    strokeWidth="1"
-                  />
-                  <polygon
-                    points="120,26 168,72 150,150 96,160 58,78"
-                    fill="rgba(254,40,0,0.12)"
-                    stroke="#FE2800"
-                    strokeWidth="2"
-                  />
-                  <text x="120" y="2" textAnchor="middle" fontSize="9" fill="#A4A49B">
-                    Cultura
-                  </text>
-                  <text x="222" y="66" textAnchor="start" fontSize="9" fill="#A4A49B">
-                    Equipos
-                  </text>
-                  <text x="186" y="188" textAnchor="middle" fontSize="9" fill="#A4A49B">
-                    Proyectos
-                  </text>
-                  <text x="54" y="188" textAnchor="middle" fontSize="9" fill="#A4A49B">
-                    Decisiones
-                  </text>
-                  <text x="18" y="66" textAnchor="end" fontSize="9" fill="#A4A49B">
-                    Colab.
-                  </text>
-                </svg>
+                <div className="flex flex-col">
+                  {PASOS_PROCESO.map((paso, indice) => {
+                    const acento = PALETA_ACENTOS[indice % PALETA_ACENTOS.length];
+                    return (
+                      <div
+                        key={paso.numero}
+                        className={`flex items-start gap-4 py-4 ${
+                          indice < PASOS_PROCESO.length - 1
+                            ? "border-b border-gris-verde/15"
+                            : ""
+                        }`}
+                      >
+                        <span
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-heading text-sm ${acento.fondo} ${acento.texto}`}
+                        >
+                          {paso.numero}
+                        </span>
+                        <div>
+                          <h3 className="font-heading text-sm text-gris-oscuro">
+                            {paso.titulo}
+                          </h3>
+                          <p className="mt-1 text-xs leading-relaxed text-gris-medio">
+                            {paso.descripcion}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -294,63 +272,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Cómo funciona */}
-      <section id="como-funciona" className="scroll-mt-24">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-24 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-32">
-          <RevealOnScroll>
-            <span className="text-xs font-bold uppercase tracking-[0.14em] text-gris-medio">
-              Proceso
-            </span>
-            <h2 className="mt-3 max-w-xs font-heading text-4xl leading-tight text-gris-oscuro">
-              De la pregunta a la acción
-            </h2>
-          </RevealOnScroll>
-
-          <div className="flex flex-col">
-            {PASOS_PROCESO.map((paso, indice) => {
-              const acento = PALETA_ACENTOS[indice % PALETA_ACENTOS.length];
-              return (
-                <RevealOnScroll
-                  key={paso.numero}
-                  retrasoMs={indice * 120}
-                  className={`group flex items-center gap-8 py-8 ${
-                    indice < PASOS_PROCESO.length - 1
-                      ? "border-b border-gris-verde/20"
-                      : ""
-                  }`}
-                >
-                  <span
-                    className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl font-heading text-lg transition-transform duration-500 group-hover:-rotate-3 group-hover:scale-110 ${acento.fondo} ${acento.texto}`}
-                  >
-                    {paso.numero}
-                  </span>
-                  <div>
-                    <h3 className="font-heading text-xl text-gris-oscuro transition-transform duration-500 group-hover:translate-x-1">
-                      {paso.titulo}
-                    </h3>
-                    <p className="mt-2 max-w-md text-gris-medio">
-                      {paso.descripcion}
-                    </p>
-                  </div>
-                </RevealOnScroll>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* 6 dimensiones */}
       <section id="dimensiones" className="scroll-mt-24 bg-white">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-24 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:py-32">
+        <div className="mx-auto max-w-6xl px-6 pt-24 lg:px-10 lg:pt-32">
+          <RevealOnScroll className="flex items-center justify-center rounded-2xl border-l-4 border-rojo-brillante bg-off-white px-8 py-10 text-center sm:px-10">
+            <p className="font-heading text-2xl leading-snug text-gris-oscuro sm:text-3xl">
+              Impulsar la innovación a través de capacidades operativas y estratégicas sólidas
+            </p>
+          </RevealOnScroll>
+        </div>
+
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 pb-24 pt-16 lg:grid-cols-[0.75fr_1.25fr] lg:px-10 lg:pb-32 lg:pt-20">
           <RevealOnScroll>
             <span className="text-xs font-bold uppercase tracking-[0.14em] text-gris-medio">
               Modelo
             </span>
             <h2 className="mt-3 max-w-xs font-heading text-4xl leading-tight text-gris-oscuro">
-              6 dimensiones que evaluamos
+              Evaluamos 6 dimensiones clave
             </h2>
             <p className="mt-4 max-w-xs text-gris-medio">
-              Un modelo integral para entender dónde está tu organización hoy.
+              Cada dimensión revela un aspecto distinto de la madurez en
+              innovación.
             </p>
           </RevealOnScroll>
 
@@ -411,7 +353,7 @@ export default function Home() {
             Empieza hoy
           </span>
           <h2 className="mx-auto mt-4 max-w-lg font-heading text-4xl leading-tight text-off-white sm:text-5xl">
-            ¿Listo para conocer tu madurez en innovación?
+            Conoce el nivel de madurez en innovación
           </h2>
           <p className="mt-4 text-off-white/65">
             Gratis. Resultados al instante.

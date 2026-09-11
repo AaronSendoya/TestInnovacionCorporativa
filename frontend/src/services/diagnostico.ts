@@ -9,21 +9,13 @@ export interface PerfilDiagnostico {
   telefono?: string;
   cargo: string;
   cargo_otro?: string;
-  relacion_decisiones: string;
 }
 
 export interface EmpresaDiagnostico {
   nombre: string;
   sector: string;
-  tamano: string;
+  sector_otro?: string;
   focos: string[];
-}
-
-export interface ContextoDiagnostico {
-  obstaculo: string;
-  prioridad: string;
-  impacto: string;
-  horizonte: string;
 }
 
 export interface RespuestasDiagnostico {
@@ -38,7 +30,6 @@ export interface RespuestasDiagnostico {
 export interface DiagnosticoPayload {
   perfil: PerfilDiagnostico;
   empresa: EmpresaDiagnostico;
-  contexto: ContextoDiagnostico;
   respuestas: RespuestasDiagnostico;
 }
 
@@ -46,12 +37,13 @@ export interface DiagnosticoResultado {
   id: string;
   perfil: PerfilDiagnostico;
   empresa: EmpresaDiagnostico;
-  contexto: ContextoDiagnostico;
   scoresPorDimension: Record<string, number>;
   nivelesPorDimension: Record<string, string>;
   scorePonderado: number;
   scoreTotal100: number;
   dimensionCritica: string;
+  dimensionesCriticas?: string[];
+  nivelInnovacion: string;
   brecha: number;
   arquetipo: string;
   diagnostico: string;

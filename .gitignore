@@ -78,3 +78,7 @@ skills-lock.json
 
 # Documentacion interna (no publica)
 *.md
+
+# Firebase Hosting cache
+.firebase-hosting-cache
+firebase.json

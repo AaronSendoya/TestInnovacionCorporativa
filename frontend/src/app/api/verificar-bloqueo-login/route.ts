@@ -1,7 +1,16 @@
 import { dbAdmin } from "@/lib/server/firebaseAdmin";
+import { verificarAppCheck } from "@/lib/server/verificarAppCheck";
+import { ErrorHttp } from "@/lib/server/httpError";
 import { normalizarEmail } from "@/lib/server/loginRateLimit";
 
 export async function POST(request: Request) {
+  try {
+    await verificarAppCheck(request);
+  } catch (error) {
+    const codigo = error instanceof ErrorHttp ? error.codigoHttp : 401;
+    return Response.json({ error: (error as Error).message }, { status: codigo });
+  }
+
   try {
     const cuerpo = await request.json().catch(() => null);
     const email = normalizarEmail(cuerpo?.email);

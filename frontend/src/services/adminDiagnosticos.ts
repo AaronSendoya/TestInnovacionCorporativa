@@ -76,3 +76,32 @@ export async function obtenerDiagnosticos({
     total: Number(datos?.total) || 0,
   };
 }
+
+export async function eliminarDiagnostico(id: string): Promise<void> {
+  const usuario = auth.currentUser;
+  if (!usuario) {
+    throw new Error("Debes iniciar sesión como administrador.");
+  }
+
+  let token: string;
+  try {
+    token = await usuario.getIdToken();
+  } catch {
+    throw new Error("No se pudo verificar tu sesión. Vuelve a iniciar sesión.");
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`/api/admin-diagnosticos/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    throw new Error("No se pudo conectar con el servidor.");
+  }
+
+  if (!response.ok) {
+    const cuerpo = await response.json().catch(() => null);
+    throw new Error(cuerpo?.error || "No se pudo eliminar el diagnóstico.");
+  }
+}

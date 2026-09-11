@@ -25,41 +25,75 @@ import {
   type DiagnosticoResultado,
 } from "@/services/diagnostico";
 import PantallaCargaEnvio from "@/components/PantallaCargaEnvio";
+import {
+  AR,
+  BO,
+  BR,
+  CA,
+  CL,
+  CN,
+  CO,
+  CR,
+  CU,
+  DE,
+  DO,
+  EC,
+  ES,
+  FR,
+  GB,
+  GT,
+  HN,
+  IN,
+  IT,
+  JP,
+  MX,
+  NI,
+  PA,
+  PE,
+  PR,
+  PT,
+  PY,
+  SV,
+  UY,
+  VE,
+} from "country-flag-icons/react/3x2";
 
 const CARGOS = [
   "CEO / Gerente General",
+  "Director/a",
   "Gerente de Innovación",
   "Gerente de Área",
+  "Subgerente",
   "Jefe de Proyecto",
+  "Coordinador/a",
+  "Analista",
+  "Consultor/a",
   "Otro",
 ];
 
-const RELACIONES_DECISION = [
-  "Decisor directo",
-  "Influye en la decisión",
-  "Ejecutor",
-];
-
 const SECTORES = [
-  "Retail",
-  "Manufactura",
-  "Servicios Financieros",
-  "Logística",
-  "Construcción",
-  "Textil",
-  "Tecnología",
-  "Seguros",
-  "Salud",
   "Agroindustria",
-  "Minería",
+  "Alimentos",
+  "Automotriz",
+  "Banca y Finanzas",
+  "Construcción",
+  "Educación",
   "Energía",
-  "Editorial",
+  "Gobierno / Sector Público",
+  "Inmobiliario",
+  "Logística",
+  "Manufactura",
+  "Minería",
+  "Retail",
+  "Salud",
+  "Seguros",
+  "Tecnología",
+  "Telecomunicaciones",
+  "Textil",
   "Transporte",
   "Turismo",
   "Otro",
 ];
-
-const TAMANOS = ["Pequeña", "Mediana", "Grande", "Corporativa"];
 
 const FOCOS_EMPRESA = [
   "Eficiencia operativa",
@@ -68,33 +102,13 @@ const FOCOS_EMPRESA = [
   "Sostenibilidad",
   "Transformación digital",
   "Expansión de mercado",
-];
-
-const OBSTACULOS = [
-  "Falta de tiempo y foco directivo",
-  "Resistencia al cambio cultural",
-  "Presupuesto limitado para innovación",
-  "Falta de talento especializado",
-  "Silos entre áreas y falta de colaboración",
-];
-
-const PRIORIDADES = [
-  "Mejorar la experiencia del cliente",
-  "Optimizar procesos internos",
-  "Lanzar nuevos productos o servicios",
-  "Adoptar tecnología digital",
-  "Fortalecer alianzas externas",
-];
-
-const IMPACTOS = [
-  "Aumento de ingresos",
   "Reducción de costos",
-  "Diversificación de ingresos",
-  "Mejora de eficiencia operativa",
-  "Acceso a nuevos mercados",
+  "Desarrollo de talento",
+  "Automatización de procesos",
+  "Inteligencia artificial y datos",
+  "Alianzas estratégicas",
+  "Cadena de suministro",
 ];
-
-const HORIZONTES = ["0-6 meses", "6-12 meses", "12-24 meses"];
 
 interface Pais {
   nombre: string;
@@ -136,15 +150,117 @@ const PAISES: Pais[] = [
   { nombre: "India", iso2: "IN", dial: "+91" },
 ];
 
-function banderaEmoji(iso2: string): string {
-  return iso2
-    .toUpperCase()
-    .replace(/./g, (letra) =>
-      String.fromCodePoint(127397 + letra.charCodeAt(0))
-    );
+interface BanderaPaisProps {
+  iso2: string;
+  className?: string;
 }
 
+function BanderaPais({ iso2, className }: BanderaPaisProps) {
+  const Bandera = BANDERAS[iso2];
+  if (!Bandera) {
+    return null;
+  }
+  return (
+    <span
+      className={clsx(
+        "inline-block shrink-0 overflow-hidden rounded-[2px]",
+        className
+      )}
+    >
+      <Bandera className="h-full w-full object-cover" />
+    </span>
+  );
+}
+
+const BANDERAS: Record<string, typeof BO> = {
+  AR,
+  BO,
+  BR,
+  CA,
+  CL,
+  CN,
+  CO,
+  CR,
+  CU,
+  DE,
+  DO,
+  EC,
+  ES,
+  FR,
+  GB,
+  GT,
+  HN,
+  IN,
+  IT,
+  JP,
+  MX,
+  NI,
+  PA,
+  PE,
+  PR,
+  PT,
+  PY,
+  SV,
+  UY,
+  VE,
+};
+
 const TELEFONO_REGEX = /^[0-9]{6,12}$/;
+
+const VOCALES = new Set("aeiouyáéíóúAEIOUYÁÉÍÓÚ".split(""));
+
+// Palabra sin ninguna vocal (incluyendo "y") entre 5+ letras: casi imposible
+// en un nombre/palabra real, muy común al presionar teclas al azar.
+function tieneVocalesInsuficientes(palabra: string): boolean {
+  const letras = [...palabra].filter((c) => /[a-zA-ZÀ-ÿ]/.test(c));
+  if (letras.length < 5) return false;
+  return !letras.some((c) => VOCALES.has(c));
+}
+
+// Un mismo par de letras dominando la palabra (ej. "sdsdsd..."): tipico de
+// pasar los dedos por teclas vecinas del teclado.
+function tieneBigramaRepetido(palabra: string): boolean {
+  const normalizada = palabra.toLowerCase();
+  if (normalizada.length < 5) return false;
+  const conteo = new Map<string, number>();
+  for (let i = 0; i < normalizada.length - 1; i++) {
+    const bigrama = normalizada.slice(i, i + 2);
+    conteo.set(bigrama, (conteo.get(bigrama) ?? 0) + 1);
+  }
+  const totalBigramas = normalizada.length - 1;
+  const maxRepeticiones = Math.max(...conteo.values());
+  return maxRepeticiones >= 3 && maxRepeticiones / totalBigramas >= 0.25;
+}
+
+// Un patron corto (1 a 3 caracteres) que se repite y cubre casi toda la
+// palabra (ej. "asdasdasd", "aaaaaa").
+function tienePatronCorto(palabra: string): boolean {
+  const normalizada = palabra.toLowerCase();
+  if (normalizada.length < 6) return false;
+  for (let longitudPatron = 1; longitudPatron <= 3; longitudPatron++) {
+    const patron = normalizada.slice(0, longitudPatron);
+    let coincidencias = 0;
+    for (let i = 0; i + longitudPatron <= normalizada.length; i += longitudPatron) {
+      if (normalizada.slice(i, i + longitudPatron) === patron) {
+        coincidencias += longitudPatron;
+      }
+    }
+    if (coincidencias / normalizada.length >= 0.7) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function pareceTextoAleatorio(texto: string): boolean {
+  const palabras = texto.trim().split(/\s+/);
+  return palabras.some(
+    (palabra) =>
+      tieneVocalesInsuficientes(palabra) ||
+      tieneBigramaRepetido(palabra) ||
+      tienePatronCorto(palabra)
+  );
+}
 
 const dimensionRespuestasSchema = z
   .array(z.number().int().min(1).max(4))
@@ -165,7 +281,11 @@ const perfilSchema = z
       .string()
       .min(2, "Mínimo 2 caracteres.")
       .max(50, "Máximo 50 caracteres.")
-      .regex(/^[A-Za-zÀ-ÿ\s'-]+$/, "Solo se permiten letras y espacios."),
+      .regex(/^[A-Za-zÀ-ÿ\s'-]+$/, "Solo se permiten letras y espacios.")
+      .refine(
+        (valor) => !pareceTextoAleatorio(valor),
+        "Ingresa un nombre válido."
+      ),
     email: z.string().email("Ingresa un email válido."),
     pais: z.string().optional(),
     codigoPais: z.string().optional(),
@@ -176,15 +296,23 @@ const perfilSchema = z
       .optional(),
     cargo: z.string().min(1, "Selecciona un cargo."),
     cargo_otro: z.string().max(50, "Máximo 50 caracteres.").optional(),
-    relacion_decisiones: z.string().min(1, "Selecciona una opción."),
   })
   .superRefine((datos, ctx) => {
-    if (datos.cargo === "Otro" && !datos.cargo_otro?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["cargo_otro"],
-        message: "Especifica tu cargo.",
-      });
+    if (datos.cargo === "Otro") {
+      const cargoOtro = datos.cargo_otro?.trim();
+      if (!cargoOtro) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["cargo_otro"],
+          message: "Especifica tu cargo.",
+        });
+      } else if (pareceTextoAleatorio(cargoOtro)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["cargo_otro"],
+          message: "Ingresa un cargo válido.",
+        });
+      }
     }
 
     if (datos.telefono?.trim()) {
@@ -205,30 +333,45 @@ const perfilSchema = z
     }
   });
 
-const empresaSchema = z.object({
-  nombre: z
-    .string()
-    .min(2, "Mínimo 2 caracteres.")
-    .max(100, "Máximo 100 caracteres."),
-  sector: z.string().min(1, "Selecciona un sector."),
-  tamano: z.string().min(1, "Selecciona un tamaño."),
-  focos: z
-    .array(z.string())
-    .min(1, "Selecciona al menos 1 foco.")
-    .max(2, "Selecciona máximo 2 focos."),
-});
-
-const contextoSchema = z.object({
-  obstaculo: z.string().min(1, "Selecciona una opción."),
-  prioridad: z.string().min(1, "Selecciona una opción."),
-  impacto: z.string().min(1, "Selecciona una opción."),
-  horizonte: z.string().min(1, "Selecciona una opción."),
-});
+const empresaSchema = z
+  .object({
+    nombre: z
+      .string()
+      .min(2, "Mínimo 2 caracteres.")
+      .max(100, "Máximo 100 caracteres.")
+      .refine(
+        (valor) => !pareceTextoAleatorio(valor),
+        "Ingresa un nombre de empresa válido."
+      ),
+    sector: z.string().min(1, "Selecciona un sector."),
+    sector_otro: z.string().max(30, "Máximo 30 caracteres.").optional(),
+    focos: z
+      .array(z.string())
+      .min(1, "Selecciona al menos 1 foco.")
+      .max(3, "Selecciona máximo 3 focos."),
+  })
+  .superRefine((datos, ctx) => {
+    if (datos.sector === "Otro") {
+      const sectorOtro = datos.sector_otro?.trim();
+      if (!sectorOtro) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sector_otro"],
+          message: "Especifica tu sector.",
+        });
+      } else if (pareceTextoAleatorio(sectorOtro)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sector_otro"],
+          message: "Ingresa un sector válido.",
+        });
+      }
+    }
+  });
 
 const formularioSchema = z.object({
   perfil: perfilSchema,
   empresa: empresaSchema,
-  contexto: contextoSchema,
   respuestas: respuestasSchema,
 });
 
@@ -248,6 +391,7 @@ interface PreguntaDimension {
 interface DimensionConfig {
   key: DimensionKey;
   titulo: string;
+  descripcion: string;
   icono: LucideIcon;
   preguntas: PreguntaDimension[];
 }
@@ -256,6 +400,8 @@ const DIMENSIONES: DimensionConfig[] = [
   {
     key: "cultura",
     titulo: "Cultura",
+    descripcion:
+      "Explora cómo la empresa promueve ideas, experimentación y aprendizaje.",
     icono: Lightbulb,
     preguntas: [
       {
@@ -290,6 +436,8 @@ const DIMENSIONES: DimensionConfig[] = [
   {
     key: "equipos",
     titulo: "Equipos",
+    descripcion:
+      "Evalúa si existen roles y equipos responsables de impulsar la innovación.",
     icono: Users,
     preguntas: [
       {
@@ -324,6 +472,8 @@ const DIMENSIONES: DimensionConfig[] = [
   {
     key: "proyectos",
     titulo: "Proyectos",
+    descripcion:
+      "Analiza cómo se gestionan las ideas y su transformación en proyectos.",
     icono: Rocket,
     preguntas: [
       {
@@ -358,6 +508,8 @@ const DIMENSIONES: DimensionConfig[] = [
   {
     key: "toma_decisiones",
     titulo: "Toma de Decisiones",
+    descripcion:
+      "Explora cómo se priorizan iniciativas y se asignan recursos para innovar.",
     icono: Scale,
     preguntas: [
       {
@@ -392,6 +544,8 @@ const DIMENSIONES: DimensionConfig[] = [
   {
     key: "colaboracion_externa",
     titulo: "Colaboración Externa",
+    descripcion:
+      "Evalúa el nivel de colaboración con actores externos del ecosistema.",
     icono: Handshake,
     preguntas: [
       {
@@ -426,6 +580,8 @@ const DIMENSIONES: DimensionConfig[] = [
   {
     key: "estrategia_portafolio",
     titulo: "Estrategia & Portafolio",
+    descripcion:
+      "Analiza cómo la innovación se integra en la estrategia de la empresa.",
     icono: Target,
     preguntas: [
       {
@@ -459,7 +615,7 @@ const DIMENSIONES: DimensionConfig[] = [
   },
 ];
 
-type CampoPaso = "perfil" | "empresa" | "contexto" | `respuestas.${DimensionKey}`;
+type CampoPaso = "perfil" | "empresa" | `respuestas.${DimensionKey}`;
 
 interface PasoConfig {
   id: string;
@@ -476,16 +632,10 @@ const PASOS: PasoConfig[] = [
       "Cuéntanos quién eres y sobre tu organización. Toma menos de un minuto.",
     campos: ["perfil", "empresa"],
   },
-  {
-    id: "contexto",
-    titulo: "Contexto",
-    descripcion: "Cuéntanos el contexto de innovación de tu empresa.",
-    campos: ["contexto"],
-  },
   ...DIMENSIONES.map((dimension) => ({
     id: dimension.key,
     titulo: dimension.titulo,
-    descripcion: `Responde sobre ${dimension.titulo.toLowerCase()}.`,
+    descripcion: dimension.descripcion,
     campos: [`respuestas.${dimension.key}`] as CampoPaso[],
   })),
 ];
@@ -499,19 +649,12 @@ const VALORES_INICIALES: FormularioValues = {
     telefono: "",
     cargo: "",
     cargo_otro: "",
-    relacion_decisiones: "",
   },
   empresa: {
     nombre: "",
     sector: "",
-    tamano: "",
+    sector_otro: "",
     focos: [],
-  },
-  contexto: {
-    obstaculo: "",
-    prioridad: "",
-    impacto: "",
-    horizonte: "",
   },
   respuestas: {
     cultura: [],
@@ -596,9 +739,7 @@ function SelectorPais({
       >
         {paisActual ? (
           <span className="flex min-w-0 items-center gap-2">
-            <span className="text-lg leading-none">
-              {banderaEmoji(paisActual.iso2)}
-            </span>
+            <BanderaPais iso2={paisActual.iso2} className="h-3.5 w-5" />
             <span className="truncate">{paisActual.nombre}</span>
           </span>
         ) : (
@@ -625,9 +766,7 @@ function SelectorPais({
                   pais.iso2 === valor && "bg-rojo-brillante/5 text-gris-oscuro"
                 )}
               >
-                <span className="text-lg leading-none">
-                  {banderaEmoji(pais.iso2)}
-                </span>
+                <BanderaPais iso2={pais.iso2} className="h-3.5 w-5" />
                 <span className="truncate">{pais.nombre}</span>
                 <span className="ml-auto shrink-0 text-xs text-gris-medio">
                   {pais.dial}
@@ -665,13 +804,14 @@ export default function FormularioDiagnostico({
 
   const valoresActuales = watch();
   const cargoSeleccionado = valoresActuales.perfil?.cargo;
+  const sectorSeleccionado = valoresActuales.empresa?.sector;
   const focosSeleccionados = valoresActuales.empresa?.focos ?? [];
-  const limiteFocosAlcanzado = focosSeleccionados.length >= 2;
+  const limiteFocosAlcanzado = focosSeleccionados.length >= 3;
 
   const paso = PASOS[pasoActual];
   const esUltimoPaso = pasoActual === PASOS.length - 1;
   const dimensionActual =
-    pasoActual >= 2 ? DIMENSIONES[pasoActual - 2] : undefined;
+    pasoActual >= 1 ? DIMENSIONES[pasoActual - 1] : undefined;
 
   const datosGeneralesCompletos = Boolean(
     valoresActuales.perfil?.nombre?.trim() &&
@@ -679,18 +819,11 @@ export default function FormularioDiagnostico({
       valoresActuales.perfil?.cargo &&
       (valoresActuales.perfil?.cargo !== "Otro" ||
         valoresActuales.perfil?.cargo_otro?.trim()) &&
-      valoresActuales.perfil?.relacion_decisiones &&
       valoresActuales.empresa?.nombre?.trim() &&
       valoresActuales.empresa?.sector &&
-      valoresActuales.empresa?.tamano &&
+      (valoresActuales.empresa?.sector !== "Otro" ||
+        valoresActuales.empresa?.sector_otro?.trim()) &&
       (valoresActuales.empresa?.focos?.length ?? 0) >= 1
-  );
-
-  const contextoCompleto = Boolean(
-    valoresActuales.contexto?.obstaculo &&
-      valoresActuales.contexto?.prioridad &&
-      valoresActuales.contexto?.impacto &&
-      valoresActuales.contexto?.horizonte
   );
 
   const todasLasDimensionesCompletas = DIMENSIONES.every((dimension) =>
@@ -698,7 +831,7 @@ export default function FormularioDiagnostico({
   );
 
   const formularioCompletoManualmente =
-    datosGeneralesCompletos && contextoCompleto && todasLasDimensionesCompletas;
+    datosGeneralesCompletos && todasLasDimensionesCompletas;
 
   async function irSiguiente() {
     const esValido = await trigger(paso.campos);
@@ -706,8 +839,6 @@ export default function FormularioDiagnostico({
     let pasoCompletoManualmente = true;
     if (pasoActual === 0) {
       pasoCompletoManualmente = datosGeneralesCompletos;
-    } else if (pasoActual === 1) {
-      pasoCompletoManualmente = contextoCompleto;
     } else if (dimensionActual) {
       pasoCompletoManualmente = esRespuestaDimensionValida(
         valoresActuales.respuestas?.[dimensionActual.key]
@@ -918,26 +1049,6 @@ export default function FormularioDiagnostico({
                     />
                   </label>
                 )}
-
-                <label className="flex flex-col gap-1 text-sm text-gris-oscuro sm:col-span-2">
-                  Tu relación con la toma de decisiones
-                  <select
-                    {...register("perfil.relacion_decisiones")}
-                    className={clasesInput(
-                      !!errors.perfil?.relacion_decisiones
-                    )}
-                  >
-                    <option value="">Selecciona una opción</option>
-                    {RELACIONES_DECISION.map((relacion) => (
-                      <option key={relacion} value={relacion}>
-                        {relacion}
-                      </option>
-                    ))}
-                  </select>
-                  <MensajeError
-                    mensaje={errors.perfil?.relacion_decisiones?.message}
-                  />
-                </label>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -967,26 +1078,24 @@ export default function FormularioDiagnostico({
                   <MensajeError mensaje={errors.empresa?.sector?.message} />
                 </label>
 
-                <label className="flex flex-col gap-1 text-sm text-gris-oscuro">
-                  Tamaño
-                  <select
-                    {...register("empresa.tamano")}
-                    className={clasesInput(!!errors.empresa?.tamano)}
-                  >
-                    <option value="">Selecciona una opción</option>
-                    {TAMANOS.map((tamano) => (
-                      <option key={tamano} value={tamano}>
-                        {tamano}
-                      </option>
-                    ))}
-                  </select>
-                  <MensajeError mensaje={errors.empresa?.tamano?.message} />
-                </label>
+                {sectorSeleccionado === "Otro" && (
+                  <label className="flex flex-col gap-1 text-sm text-gris-oscuro sm:col-span-2">
+                    Especifica tu sector
+                    <input
+                      maxLength={30}
+                      {...register("empresa.sector_otro")}
+                      className={clasesInput(!!errors.empresa?.sector_otro)}
+                    />
+                    <MensajeError
+                      mensaje={errors.empresa?.sector_otro?.message}
+                    />
+                  </label>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">
                 <p className="text-sm font-medium text-gris-oscuro">
-                  Focos estratégicos (máximo 2)
+                  ¿Cuáles son los principales focos de la empresa hoy? (selecciona máximo 3)
                 </p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {FOCOS_EMPRESA.map((foco) => {
@@ -1031,74 +1140,6 @@ export default function FormularioDiagnostico({
                 </div>
                 <MensajeError mensaje={errors.empresa?.focos?.message} />
               </div>
-            </div>
-          )}
-
-          {pasoActual === 1 && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label className="flex flex-col gap-1 text-sm text-gris-oscuro sm:col-span-2">
-                ¿Cuál es el principal obstáculo para innovar hoy?
-                <select
-                  {...register("contexto.obstaculo")}
-                  className={clasesInput(!!errors.contexto?.obstaculo)}
-                >
-                  <option value="">Selecciona una opción</option>
-                  {OBSTACULOS.map((opcion) => (
-                    <option key={opcion} value={opcion}>
-                      {opcion}
-                    </option>
-                  ))}
-                </select>
-                <MensajeError mensaje={errors.contexto?.obstaculo?.message} />
-              </label>
-
-              <label className="flex flex-col gap-1 text-sm text-gris-oscuro sm:col-span-2">
-                ¿Cuál es tu prioridad principal?
-                <select
-                  {...register("contexto.prioridad")}
-                  className={clasesInput(!!errors.contexto?.prioridad)}
-                >
-                  <option value="">Selecciona una opción</option>
-                  {PRIORIDADES.map((opcion) => (
-                    <option key={opcion} value={opcion}>
-                      {opcion}
-                    </option>
-                  ))}
-                </select>
-                <MensajeError mensaje={errors.contexto?.prioridad?.message} />
-              </label>
-
-              <label className="flex flex-col gap-1 text-sm text-gris-oscuro">
-                Impacto esperado
-                <select
-                  {...register("contexto.impacto")}
-                  className={clasesInput(!!errors.contexto?.impacto)}
-                >
-                  <option value="">Selecciona una opción</option>
-                  {IMPACTOS.map((opcion) => (
-                    <option key={opcion} value={opcion}>
-                      {opcion}
-                    </option>
-                  ))}
-                </select>
-                <MensajeError mensaje={errors.contexto?.impacto?.message} />
-              </label>
-
-              <label className="flex flex-col gap-1 text-sm text-gris-oscuro">
-                Horizonte de tiempo
-                <select
-                  {...register("contexto.horizonte")}
-                  className={clasesInput(!!errors.contexto?.horizonte)}
-                >
-                  <option value="">Selecciona una opción</option>
-                  {HORIZONTES.map((opcion) => (
-                    <option key={opcion} value={opcion}>
-                      {opcion}
-                    </option>
-                  ))}
-                </select>
-                <MensajeError mensaje={errors.contexto?.horizonte?.message} />
-              </label>
             </div>
           )}
 
@@ -1157,6 +1198,7 @@ export default function FormularioDiagnostico({
               )}
             </div>
           )}
+
         </div>
 
         {errorEnvio && (

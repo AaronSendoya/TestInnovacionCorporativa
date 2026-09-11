@@ -1,3 +1,6 @@
+import { getToken } from "firebase/app-check";
+import { appCheck } from "@/lib/firebase";
+
 export interface EstadoBloqueoLogin {
   bloqueado: boolean;
   segundosRestantes: number;
@@ -9,9 +12,19 @@ async function llamarEndpoint(
   url: string,
   payload: Record<string, unknown>
 ): Promise<EstadoBloqueoLogin> {
+  const headers: HeadersInit = { "Content-Type": "application/json" };
+  if (appCheck) {
+    try {
+      const { token } = await getToken(appCheck);
+      headers["X-Firebase-AppCheck"] = token;
+    } catch (error) {
+      console.error("No se pudo obtener el token de App Check:", error);
+    }
+  }
+
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(payload),
   });
 
