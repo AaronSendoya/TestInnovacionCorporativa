@@ -8,7 +8,7 @@ import {
 import {
   type AppCheck,
   initializeAppCheck,
-  ReCaptchaV3Provider,
+  ReCaptchaEnterpriseProvider,
 } from "firebase/app-check";
 
 const firebaseConfig = {
@@ -55,12 +55,15 @@ if (typeof window !== "undefined") {
   const appCheckSiteKey = process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY;
   if (!usarEmuladores && appCheckSiteKey) {
     if (process.env.NODE_ENV === "development") {
-      // Permite probar App Check desde localhost contra el backend real:
-      // el token de depuración se registra una vez en Firebase Console.
-      globalThis.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+      // Permite probar App Check desde localhost contra el backend real.
+      // Con NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN fijo, cualquier
+      // navegador local usa el mismo token ya registrado en Firebase
+      // (evita tener que registrar uno nuevo por cada navegador/perfil).
+      globalThis.FIREBASE_APPCHECK_DEBUG_TOKEN =
+        process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN ?? true;
     }
     appCheck = initializeAppCheck(firebaseApp, {
-      provider: new ReCaptchaV3Provider(appCheckSiteKey),
+      provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
       isTokenAutoRefreshEnabled: true,
     });
   }
