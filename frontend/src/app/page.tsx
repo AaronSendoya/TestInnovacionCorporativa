@@ -298,7 +298,6 @@ export default function Home() {
 
           <div className="flex flex-col">
             {DIMENSIONES.map((dimension, indice) => {
-              const acento = PALETA_ACENTOS[indice % PALETA_ACENTOS.length];
               return (
                 <RevealOnScroll
                   key={dimension.letra}
@@ -310,9 +309,7 @@ export default function Home() {
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <span
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-heading text-sm font-semibold transition-transform duration-300 group-hover:scale-110 ${acento.fondo} ${acento.texto}`}
-                    >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rojo-brillante/10 font-heading text-sm font-semibold text-rojo-brillante transition-transform duration-300 group-hover:scale-110">
                       {dimension.letra}
                     </span>
                     <span className="font-heading text-lg text-gris-oscuro transition-transform duration-300 group-hover:translate-x-1 sm:min-w-[220px]">
