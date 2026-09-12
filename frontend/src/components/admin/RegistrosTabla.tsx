@@ -46,7 +46,11 @@ function fechaLocalYMD(fecha: Date): string {
   return `${anio}-${mes}-${dia}`;
 }
 
-export default function RegistrosTabla() {
+interface RegistrosTablaProps {
+  activo?: boolean;
+}
+
+export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
   const [tamanoPagina, setTamanoPagina] = useState(10);
   const [pagina, setPagina] = useState(1);
   const [busqueda, setBusqueda] = useState("");
@@ -89,6 +93,21 @@ export default function RegistrosTabla() {
       cancelado = true;
     };
   }, []);
+
+  // La tabla se mantiene montada al cambiar de seccion (evita recargar
+  // datos y repetir animaciones); si el usuario navega fuera con un
+  // modal abierto, hay que cerrarlo porque el modal usa un portal a
+  // document.body y no se ocultaria junto con el resto de esta vista.
+  // Se ajusta durante el render (no en un efecto) siguiendo el patron
+  // recomendado por React para resetear estado cuando cambia un prop.
+  const [activoPrevio, setActivoPrevio] = useState(activo);
+  if (activo !== activoPrevio) {
+    setActivoPrevio(activo);
+    if (!activo) {
+      setSeleccionado(null);
+      setAEliminar(null);
+    }
+  }
 
   const sectoresDisponibles = useMemo(() => {
     const nombres = new Set(

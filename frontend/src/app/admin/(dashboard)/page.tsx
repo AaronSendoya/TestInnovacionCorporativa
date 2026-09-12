@@ -86,15 +86,20 @@ export default function AdminPage() {
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div className="mx-auto w-full max-w-7xl">
-            {vista === "resumen" ? (
+            {/* Ambas vistas permanecen montadas siempre: se alterna solo su
+                visibilidad (no un remount) para que cambiar de sección sea
+                instantaneo y no repita el fetch, el spinner de carga ni la
+                animacion de entrada cada vez que el usuario navega rapido. */}
+            <div className={vista === "resumen" ? "" : "hidden"}>
               <ResumenGeneral
                 seccionEnfocada={seccionEnfocada}
                 navKey={navegacion.key}
                 onVerRegistros={() => navegarA("registros")}
               />
-            ) : (
-              <RegistrosTabla />
-            )}
+            </div>
+            <div className={vista === "registros" ? "" : "hidden"}>
+              <RegistrosTabla activo={vista === "registros"} />
+            </div>
           </div>
         </main>
       </div>
