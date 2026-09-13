@@ -77,7 +77,10 @@ function nivelNarrativo(score: number): string {
   return "de excelencia";
 }
 
-type SeccionEnfocable = Exclude<SeccionAdmin, "resumen" | "registros">;
+type SeccionEnfocable = Exclude<
+  SeccionAdmin,
+  "resumen" | "registros" | "reportes" | "administradores" | "ayuda"
+>;
 
 interface ResumenGeneralProps {
   seccionEnfocada?: SeccionEnfocable | null;

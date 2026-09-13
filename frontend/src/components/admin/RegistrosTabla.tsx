@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   AlertTriangle,
   Building2,
@@ -17,33 +18,21 @@ import {
   obtenerDiagnosticos,
   type DiagnosticoAdmin,
 } from "@/services/adminDiagnosticos";
-import { CLASES_BADGE_NIVEL, COLOR_NIVEL, PALETA_ACENTOS } from "@/lib/dimensiones";
+import {
+  CLASES_BADGE_NIVEL,
+  COLOR_NIVEL,
+  PALETA_ACENTOS,
+  fechaLocalYMD,
+  nivelDeScoreTotal,
+  sectorDe,
+} from "@/lib/dimensiones";
 import DetalleDiagnosticoModal from "@/components/admin/DetalleDiagnosticoModal";
 
 const TAMANOS_PAGINA = [10, 50, 100];
 const LIMITE_TODOS = 500;
 
-function nivelDeScoreTotal(score: number): string {
-  if (score >= 75) return "Alto";
-  if (score >= 50) return "Medio";
-  return "Bajo";
-}
-
 function inicialDe(nombre?: string): string {
   return nombre?.trim()?.[0]?.toUpperCase() ?? "?";
-}
-
-function sectorDe(registro: DiagnosticoAdmin): string | undefined {
-  return registro.empresa?.sector === "Otro"
-    ? registro.empresa?.sector_otro
-    : registro.empresa?.sector;
-}
-
-function fechaLocalYMD(fecha: Date): string {
-  const anio = fecha.getFullYear();
-  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
-  const dia = String(fecha.getDate()).padStart(2, "0");
-  return `${anio}-${mes}-${dia}`;
 }
 
 interface RegistrosTablaProps {
@@ -509,66 +498,71 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
         />
       )}
 
-      {aEliminar && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gris-oscuro/55 p-4"
-          onClick={() => !eliminando && setAEliminar(null)}
-        >
+      {/* Portal a document.body: este contenedor tiene animate-entrada, cuya
+          animacion deja un transform activo (fill-mode both) que rompe el
+          centrado de position:fixed si el modal se anida dentro. */}
+      {aEliminar &&
+        createPortal(
           <div
-            className="flex w-full max-w-sm flex-col gap-4 rounded-2xl bg-white p-6"
-            onClick={(evento) => evento.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-gris-oscuro/55 p-4"
+            onClick={() => !eliminando && setAEliminar(null)}
           >
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rojo-oscuro/10 text-rojo-oscuro">
-                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="font-heading text-lg text-gris-oscuro">
-                  Eliminar diagnóstico
-                </h2>
-                <p className="mt-1 text-sm text-gris-medio">
-                  Se eliminará permanentemente el diagnóstico de{" "}
-                  <span className="font-semibold text-gris-oscuro">
-                    {aEliminar.empresa?.nombre ?? "esta empresa"}
-                  </span>{" "}
-                  ({aEliminar.perfil?.nombre ?? "sin contacto"}). Esta acción
-                  no se puede deshacer.
+            <div
+              className="flex max-h-[90vh] w-full max-w-sm flex-col gap-4 overflow-y-auto rounded-2xl bg-white p-6"
+              onClick={(evento) => evento.stopPropagation()}
+            >
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rojo-oscuro/10 text-rojo-oscuro">
+                  <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <h2 className="font-heading text-lg text-gris-oscuro">
+                    Eliminar diagnóstico
+                  </h2>
+                  <p className="mt-1 text-sm text-gris-medio">
+                    Se eliminará permanentemente el diagnóstico de{" "}
+                    <span className="font-semibold text-gris-oscuro">
+                      {aEliminar.empresa?.nombre ?? "esta empresa"}
+                    </span>{" "}
+                    ({aEliminar.perfil?.nombre ?? "sin contacto"}). Esta
+                    acción no se puede deshacer.
+                  </p>
+                </div>
+              </div>
+
+              {errorEliminar && (
+                <p className="rounded-lg bg-rojo-oscuro/10 px-3 py-2 text-xs text-rojo-oscuro">
+                  {errorEliminar}
                 </p>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAEliminar(null)}
+                  disabled={eliminando}
+                  className="rounded-full border border-gris-medio px-4 py-2 text-sm font-medium text-gris-oscuro transition-colors hover:bg-gris-verde/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmarEliminacion}
+                  disabled={eliminando}
+                  className="flex items-center gap-2 rounded-full bg-rojo-oscuro px-4 py-2 text-sm font-medium text-off-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {eliminando ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  Eliminar
+                </button>
               </div>
             </div>
-
-            {errorEliminar && (
-              <p className="rounded-lg bg-rojo-oscuro/10 px-3 py-2 text-xs text-rojo-oscuro">
-                {errorEliminar}
-              </p>
-            )}
-
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setAEliminar(null)}
-                disabled={eliminando}
-                className="rounded-full border border-gris-medio px-4 py-2 text-sm font-medium text-gris-oscuro transition-colors hover:bg-gris-verde/10 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={confirmarEliminacion}
-                disabled={eliminando}
-                className="flex items-center gap-2 rounded-full bg-rojo-oscuro px-4 py-2 text-sm font-medium text-off-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {eliminando ? (
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
-                )}
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

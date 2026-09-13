@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import ContadorNumero from "@/components/ContadorNumero";
+import MobileNav from "@/components/MobileNav";
 
 const PALETA_ACENTOS = [
   { fondo: "bg-rojo-brillante/10", texto: "text-rojo-brillante" },
@@ -108,6 +109,8 @@ export default function Home() {
               Iniciar Sesión
             </Link>
           </nav>
+
+          <MobileNav />
         </div>
       </header>
 
@@ -138,27 +141,12 @@ export default function Home() {
             </span>
 
             <h1
-              className="animate-entrada font-heading text-5xl leading-[1.03] tracking-tight text-gris-oscuro sm:text-6xl"
+              className="animate-entrada font-heading text-4xl leading-[1.1] tracking-tight text-gris-oscuro sm:text-5xl sm:leading-[1.05] lg:text-6xl lg:leading-[1.03]"
               style={{ animationDelay: "80ms" }}
             >
-              Claridad absoluta para dar el siguiente {" "}
-              <span className="relative whitespace-nowrap">
+              Claridad absoluta para dar el siguiente{" "}
+              <span className="underline decoration-rojo-brillante decoration-4 underline-offset-8">
                 gran salto corporativo
-                <svg
-                  aria-hidden="true"
-                  className="absolute -bottom-2 left-0 w-full"
-                  height="12"
-                  viewBox="0 0 220 12"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0 7 Q110 -3 220 7"
-                    stroke="#FE2800"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                </svg>
               </span>
             </h1>
 
@@ -365,7 +353,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="flex items-center justify-between px-6 py-7 text-sm text-gris-medio lg:px-10">
+      <footer className="flex flex-col items-center gap-2 px-6 py-7 text-center text-sm text-gris-medio sm:flex-row sm:justify-between sm:text-left lg:px-10">
         <span className="font-heading text-gris-oscuro">PISTA8</span>
         <span>© {new Date().getFullYear()} Pista8. Todos los derechos reservados.</span>
       </footer>

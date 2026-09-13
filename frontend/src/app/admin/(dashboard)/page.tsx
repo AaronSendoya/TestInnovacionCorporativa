@@ -8,6 +8,9 @@ import AdminSidebar, { type SeccionAdmin } from "@/components/admin/AdminSidebar
 import AdminHeader from "@/components/admin/AdminHeader";
 import ResumenGeneral from "@/components/admin/ResumenGeneral";
 import RegistrosTabla from "@/components/admin/RegistrosTabla";
+import ReportesExportacion from "@/components/admin/ReportesExportacion";
+import GestionAdministradores from "@/components/admin/GestionAdministradores";
+import AyudaGuia from "@/components/admin/AyudaGuia";
 
 const TITULOS_SECCION: Record<SeccionAdmin, { titulo: string; subtitulo: string }> = {
   resumen: {
@@ -17,6 +20,10 @@ const TITULOS_SECCION: Record<SeccionAdmin, { titulo: string; subtitulo: string 
   registros: {
     titulo: "Registros",
     subtitulo: "Historial completo de diagnósticos",
+  },
+  reportes: {
+    titulo: "Reportes",
+    subtitulo: "Exportar diagnósticos a Excel (CSV)",
   },
   dimensiones: {
     titulo: "Dimensiones",
@@ -33,6 +40,14 @@ const TITULOS_SECCION: Record<SeccionAdmin, { titulo: string; subtitulo: string 
   oportunidades: {
     titulo: "Oportunidades",
     subtitulo: "Alertas y focos de mejora prioritarios",
+  },
+  administradores: {
+    titulo: "Usuarios",
+    subtitulo: "Otorga o revoca acceso al panel",
+  },
+  ayuda: {
+    titulo: "Ayuda",
+    subtitulo: "Guía de interpretación del diagnóstico",
   },
 };
 
@@ -59,12 +74,21 @@ export default function AdminPage() {
     }
   }
 
-  const vista: "resumen" | "registros" =
-    navegacion.seccion === "registros" ? "registros" : "resumen";
-  const seccionEnfocada =
-    navegacion.seccion !== "resumen" && navegacion.seccion !== "registros"
-      ? navegacion.seccion
-      : null;
+  type Vista = "resumen" | "registros" | "reportes" | "administradores" | "ayuda";
+  let vista: Vista;
+  let seccionEnfocada: SeccionAdmin | null = null;
+
+  if (
+    navegacion.seccion === "dimensiones" ||
+    navegacion.seccion === "empresas" ||
+    navegacion.seccion === "evolucion" ||
+    navegacion.seccion === "oportunidades"
+  ) {
+    vista = "resumen";
+    seccionEnfocada = navegacion.seccion;
+  } else {
+    vista = navegacion.seccion;
+  }
   const { titulo, subtitulo } = TITULOS_SECCION[navegacion.seccion];
 
   return (
@@ -99,6 +123,15 @@ export default function AdminPage() {
             </div>
             <div className={vista === "registros" ? "" : "hidden"}>
               <RegistrosTabla activo={vista === "registros"} />
+            </div>
+            <div className={vista === "reportes" ? "" : "hidden"}>
+              <ReportesExportacion activo={vista === "reportes"} />
+            </div>
+            <div className={vista === "administradores" ? "" : "hidden"}>
+              <GestionAdministradores />
+            </div>
+            <div className={vista === "ayuda" ? "" : "hidden"}>
+              <AyudaGuia />
             </div>
           </div>
         </main>

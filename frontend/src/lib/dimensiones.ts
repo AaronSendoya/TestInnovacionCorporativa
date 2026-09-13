@@ -7,6 +7,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import type { DiagnosticoAdmin } from "@/services/adminDiagnosticos";
 
 export const ORDEN_DIMENSIONES = [
   "cultura",
@@ -85,3 +86,31 @@ export const PALETA_ACENTOS: AcentoColor[] = [
   { bg: "bg-naranja", text: "text-naranja", tint: "bg-naranja/10", hex: "#FF8C12" },
   { bg: "bg-rojo-oscuro", text: "text-rojo-oscuro", tint: "bg-rojo-oscuro/10", hex: "#BE1E2D" },
 ];
+
+export function nivelDeScoreTotal(score: number): string {
+  if (score >= 75) return "Alto";
+  if (score >= 50) return "Medio";
+  return "Bajo";
+}
+
+// Mismos umbrales que nivelDeScore en lib/server/diagnosticoEngine.ts, para
+// escala 1-4 por dimension. Se duplica aqui (solo bucketing de presentacion,
+// no calculo de dominio) porque ese modulo es server-only.
+export function nivelDeScoreDimension(score: number): string {
+  if (score >= 3) return "Alto";
+  if (score >= 2) return "Medio";
+  return "Bajo";
+}
+
+export function sectorDe(registro: DiagnosticoAdmin): string | undefined {
+  return registro.empresa?.sector === "Otro"
+    ? registro.empresa?.sector_otro
+    : registro.empresa?.sector;
+}
+
+export function fechaLocalYMD(fecha: Date): string {
+  const anio = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  return `${anio}-${mes}-${dia}`;
+}
