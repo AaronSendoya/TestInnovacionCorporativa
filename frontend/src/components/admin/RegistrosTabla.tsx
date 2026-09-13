@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   AlertTriangle,
@@ -22,14 +22,14 @@ import {
   CLASES_BADGE_NIVEL,
   COLOR_NIVEL,
   PALETA_ACENTOS,
-  fechaLocalYMD,
+  SECTORES,
   nivelDeScoreTotal,
   sectorDe,
 } from "@/lib/dimensiones";
 import DetalleDiagnosticoModal from "@/components/admin/DetalleDiagnosticoModal";
 
 const TAMANOS_PAGINA = [10, 50, 100];
-const LIMITE_TODOS = 500;
+const DEMORA_DEBOUNCE_MS = 350;
 
 function inicialDe(nombre?: string): string {
   return nombre?.trim()?.[0]?.toUpperCase() ?? "?";
@@ -42,46 +42,26 @@ interface RegistrosTablaProps {
 export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
   const [tamanoPagina, setTamanoPagina] = useState(10);
   const [pagina, setPagina] = useState(1);
+  const [busquedaInput, setBusquedaInput] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [sectorFiltro, setSectorFiltro] = useState("");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
 
-  const [todos, setTodos] = useState<DiagnosticoAdmin[]>([]);
+  const [registros, setRegistros] = useState<DiagnosticoAdmin[]>([]);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [cargando, setCargando] = useState(true);
+  const [yaCargoUnaVez, setYaCargoUnaVez] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const [seleccionado, setSeleccionado] = useState<DiagnosticoAdmin | null>(
     null
   );
   const [aEliminar, setAEliminar] = useState<DiagnosticoAdmin | null>(null);
   const [eliminando, setEliminando] = useState(false);
   const [errorEliminar, setErrorEliminar] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelado = false;
-
-    async function cargar() {
-      setCargando(true);
-      setError(null);
-      try {
-        const pagina = await obtenerDiagnosticos({ limite: LIMITE_TODOS });
-        if (cancelado) return;
-        setTodos(pagina.diagnosticos);
-      } catch (err) {
-        if (cancelado) return;
-        setError(
-          err instanceof Error ? err.message : "Error al cargar diagnósticos."
-        );
-      } finally {
-        if (!cancelado) setCargando(false);
-      }
-    }
-
-    cargar();
-    return () => {
-      cancelado = true;
-    };
-  }, []);
+  const [recargaTick, setRecargaTick] = useState(0);
 
   // La tabla se mantiene montada al cambiar de seccion (evita recargar
   // datos y repetir animaciones); si el usuario navega fuera con un
@@ -98,63 +78,92 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
     }
   }
 
-  const sectoresDisponibles = useMemo(() => {
-    const nombres = new Set(
-      todos
-        .map((registro) => registro.empresa?.sector)
-        .filter((s): s is string => Boolean(s?.trim()))
-    );
-    return [...nombres].sort((a, b) => {
-      if (a === "Otro") return 1;
-      if (b === "Otro") return -1;
-      return a.localeCompare(b, "es");
-    });
-  }, [todos]);
+  // Debounce de la busqueda de texto: evita disparar una consulta a
+  // Firestore en cada tecla presionada.
+  useEffect(() => {
+    const temporizador = setTimeout(() => {
+      setBusqueda(busquedaInput.trim());
+      setPagina(1);
+    }, DEMORA_DEBOUNCE_MS);
+    return () => clearTimeout(temporizador);
+  }, [busquedaInput]);
 
   const errorFechas =
     fechaDesde && fechaHasta && fechaDesde > fechaHasta
       ? "La fecha 'Desde' no puede ser posterior a 'Hasta'."
       : null;
 
-  const filtrados = useMemo(() => {
-    const texto = busqueda.trim().toLowerCase();
-    return todos.filter((registro) => {
-      if (texto) {
-        const coincideTexto =
-          registro.empresa?.nombre?.toLowerCase().includes(texto) ||
-          registro.perfil?.nombre?.toLowerCase().includes(texto);
-        if (!coincideTexto) return false;
-      }
+  // Firestore no permite combinar en una sola consulta un rango de fechas
+  // con la busqueda de texto (serian dos filtros de rango en campos
+  // distintos), asi que se excluyen mutuamente: al activar uno se
+  // deshabilita el otro en vez de ignorarlo en silencio.
+  const fechaDeshabilitada = Boolean(busquedaInput.trim());
+  const busquedaDeshabilitada = Boolean(fechaDesde || fechaHasta);
 
-      if (sectorFiltro && registro.empresa?.sector !== sectorFiltro) {
-        return false;
-      }
+  // Se ejecuta solo cuando la seccion esta o estuvo activa alguna vez:
+  // evita leer Firestore para vistas que el admin nunca abrio en la sesion.
+  useEffect(() => {
+    if (!activo && !yaCargoUnaVez) return;
 
-      if (!errorFechas && (fechaDesde || fechaHasta)) {
-        if (!registro.creadoEn) return false;
-        const ymd = fechaLocalYMD(new Date(registro.creadoEn));
-        if (fechaDesde && ymd < fechaDesde) return false;
-        if (fechaHasta && ymd > fechaHasta) return false;
+    let cancelado = false;
+    async function cargar() {
+      setCargando(true);
+      if (!yaCargoUnaVez) setError(null);
+      try {
+        const respuesta = await obtenerDiagnosticos({
+          pagina,
+          tamanoPagina,
+          busqueda: busquedaDeshabilitada ? "" : busqueda,
+          sector: sectorFiltro,
+          fechaDesde: fechaDeshabilitada ? "" : fechaDesde,
+          fechaHasta: fechaDeshabilitada ? "" : fechaHasta,
+        });
+        if (cancelado) return;
+        setRegistros(respuesta.diagnosticos);
+        setTotal(respuesta.total);
+        setHasMore(respuesta.hasMore);
+        setError(null);
+      } catch (err) {
+        if (cancelado) return;
+        setError(
+          err instanceof Error ? err.message : "Error al cargar diagnósticos."
+        );
+      } finally {
+        if (!cancelado) {
+          setCargando(false);
+          setYaCargoUnaVez(true);
+        }
       }
+    }
 
-      return true;
-    });
-  }, [todos, busqueda, sectorFiltro, fechaDesde, fechaHasta, errorFechas]);
+    cargar();
+    return () => {
+      cancelado = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    activo,
+    pagina,
+    tamanoPagina,
+    busqueda,
+    sectorFiltro,
+    fechaDesde,
+    fechaHasta,
+    busquedaDeshabilitada,
+    fechaDeshabilitada,
+    recargaTick,
+  ]);
 
   const hayFiltrosActivos = Boolean(
-    busqueda.trim() || sectorFiltro || fechaDesde || fechaHasta
+    busquedaInput.trim() || sectorFiltro || fechaDesde || fechaHasta
   );
 
   function limpiarFiltros() {
+    setBusquedaInput("");
     setBusqueda("");
     setSectorFiltro("");
     setFechaDesde("");
     setFechaHasta("");
-    setPagina(1);
-  }
-
-  function actualizarBusqueda(valor: string) {
-    setBusqueda(valor);
     setPagina(1);
   }
 
@@ -178,12 +187,9 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
     setPagina(1);
   }
 
-  const totalFiltrado = filtrados.length;
-  const totalPaginas = Math.max(1, Math.ceil(totalFiltrado / tamanoPagina));
-  const paginaActual = Math.min(pagina, totalPaginas);
-  const desde = totalFiltrado === 0 ? 0 : (paginaActual - 1) * tamanoPagina + 1;
-  const hasta = Math.min(desde + tamanoPagina - 1, totalFiltrado);
-  const registrosPagina = filtrados.slice(desde - 1, hasta);
+  const totalPaginas = Math.max(1, Math.ceil(total / tamanoPagina));
+  const desde = total === 0 ? 0 : (pagina - 1) * tamanoPagina + 1;
+  const hasta = Math.min(desde + registros.length - 1, total);
 
   async function confirmarEliminacion() {
     if (!aEliminar) return;
@@ -191,10 +197,10 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
     setErrorEliminar(null);
     try {
       await eliminarDiagnostico(aEliminar.id);
-      setTodos((actuales) =>
-        actuales.filter((registro) => registro.id !== aEliminar.id)
-      );
       setAEliminar(null);
+      // Vuelve a pedir la pagina actual al servidor: tras borrar, puede
+      // quedar con menos filas de las esperadas (o vacia).
+      setRecargaTick((actual) => actual + 1);
     } catch (err) {
       setErrorEliminar(
         err instanceof Error ? err.message : "No se pudo eliminar el diagnóstico."
@@ -204,12 +210,14 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
     }
   }
 
+  const mostrarEsqueletoInicial = cargando && !yaCargoUnaVez;
+
   return (
     <div className="animate-entrada flex flex-col gap-5">
       <p className="text-sm text-gris-medio">
         {hayFiltrosActivos
-          ? `${totalFiltrado} de ${todos.length} diagnósticos coinciden con los filtros.`
-          : `${todos.length} diagnósticos · haz clic en una fila para ver el detalle completo.`}
+          ? `${total} diagnóstico${total === 1 ? "" : "s"} coinciden con los filtros.`
+          : `${total} diagnóstico${total === 1 ? "" : "s"} · haz clic en una fila para ver el detalle completo.`}
       </p>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-gris-verde/40 bg-white p-4 shadow-sm">
@@ -221,10 +229,16 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
             />
             <input
               type="text"
-              value={busqueda}
-              onChange={(evento) => actualizarBusqueda(evento.target.value)}
+              value={busquedaInput}
+              disabled={busquedaDeshabilitada}
+              onChange={(evento) => setBusquedaInput(evento.target.value)}
               placeholder="Buscar por empresa o contacto..."
-              className="w-full rounded-full border border-gris-verde/40 bg-off-white py-2.5 pl-9 pr-3 text-sm text-gris-oscuro outline-none transition-colors focus:border-azul focus:bg-white focus:ring-2 focus:ring-azul/20"
+              title={
+                busquedaDeshabilitada
+                  ? "No se puede combinar con el filtro de fecha"
+                  : undefined
+              }
+              className="w-full rounded-full border border-gris-verde/40 bg-off-white py-2.5 pl-9 pr-3 text-sm text-gris-oscuro outline-none transition-colors focus:border-azul focus:bg-white focus:ring-2 focus:ring-azul/20 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
@@ -236,10 +250,11 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
             <select
               value={sectorFiltro}
               onChange={(evento) => actualizarSector(evento.target.value)}
+              aria-label="Filtrar por sector"
               className="rounded-full border border-gris-verde/40 bg-off-white py-2.5 pl-9 pr-8 text-sm text-gris-oscuro outline-none transition-colors focus:border-azul focus:bg-white focus:ring-2 focus:ring-azul/20"
             >
               <option value="">Todos los sectores</option>
-              {sectoresDisponibles.map((sector) => (
+              {SECTORES.map((sector) => (
                 <option key={sector} value={sector}>
                   {sector}
                 </option>
@@ -247,7 +262,14 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
             </select>
           </div>
 
-          <div className="flex items-center gap-2 rounded-full border border-gris-verde/40 bg-off-white py-1.5 pl-3 pr-2 text-sm">
+          <div
+            className="flex items-center gap-2 rounded-full border border-gris-verde/40 bg-off-white py-1.5 pl-3 pr-2 text-sm has-[:disabled]:opacity-50"
+            title={
+              fechaDeshabilitada
+                ? "No se puede combinar con la búsqueda de texto"
+                : undefined
+            }
+          >
             <CalendarRange
               className="h-4 w-4 shrink-0 text-gris-medio"
               aria-hidden="true"
@@ -255,17 +277,19 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
             <input
               type="date"
               value={fechaDesde}
+              disabled={fechaDeshabilitada}
               onChange={(evento) => actualizarFechaDesde(evento.target.value)}
               aria-label="Fecha desde"
-              className="bg-transparent text-gris-oscuro outline-none"
+              className="bg-transparent text-gris-oscuro outline-none disabled:cursor-not-allowed"
             />
             <span className="text-gris-medio">–</span>
             <input
               type="date"
               value={fechaHasta}
+              disabled={fechaDeshabilitada}
               onChange={(evento) => actualizarFechaHasta(evento.target.value)}
               aria-label="Fecha hasta"
-              className="bg-transparent text-gris-oscuro outline-none"
+              className="bg-transparent text-gris-oscuro outline-none disabled:cursor-not-allowed"
             />
           </div>
 
@@ -287,6 +311,12 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
             {errorFechas}
           </p>
         )}
+        {(fechaDeshabilitada || busquedaDeshabilitada) && (
+          <p className="text-xs text-gris-medio">
+            La búsqueda por texto y el filtro de fecha no se pueden combinar.
+            Sector sí se puede combinar con cualquiera de los dos.
+          </p>
+        )}
       </div>
 
       {error && (
@@ -295,8 +325,17 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-gris-verde/40 bg-white shadow-sm">
-        <table className="w-full min-w-[760px] text-left text-sm">
+      <div className="relative overflow-x-auto rounded-2xl border border-gris-verde/40 bg-white shadow-sm">
+        {cargando && yaCargoUnaVez && (
+          <div className="absolute inset-0 z-10 flex items-start justify-center bg-white/60 pt-10">
+            <Loader2 className="h-5 w-5 animate-spin text-azul" aria-hidden="true" />
+          </div>
+        )}
+        <table
+          className={`w-full min-w-[760px] text-left text-sm transition-opacity ${
+            cargando && yaCargoUnaVez ? "opacity-50" : "opacity-100"
+          }`}
+        >
           <thead>
             <tr className="border-b border-gris-verde/30 bg-off-white">
               <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-wide text-gris-medio">
@@ -321,7 +360,7 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
             </tr>
           </thead>
           <tbody>
-            {cargando ? (
+            {mostrarEsqueletoInicial ? (
               <tr>
                 <td colSpan={7} className="px-5 py-10 text-center text-gris-medio">
                   <span className="inline-flex items-center gap-2">
@@ -330,7 +369,7 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
                   </span>
                 </td>
               </tr>
-            ) : registrosPagina.length === 0 ? (
+            ) : registros.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-5 py-12 text-center">
                   <p className="text-gris-medio">
@@ -348,7 +387,7 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
                 </td>
               </tr>
             ) : (
-              registrosPagina.map((registro, indice) => {
+              registros.map((registro, indice) => {
                 const fecha = registro.creadoEn
                   ? new Date(registro.creadoEn)
                   : null;
@@ -461,17 +500,17 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
         </div>
 
         <p className="text-sm text-gris-medio">
-          {totalFiltrado === 0
+          {total === 0
             ? "0 resultados"
-            : `Mostrando ${desde}–${hasta} de ${totalFiltrado}`}{" "}
-          · Página {paginaActual} de {totalPaginas}
+            : `Mostrando ${desde}–${hasta} de ${total}`}{" "}
+          · Página {pagina} de {totalPaginas}
         </p>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setPagina((actual) => Math.max(1, actual - 1))}
-            disabled={paginaActual <= 1 || cargando}
+            disabled={pagina <= 1 || cargando}
             className="flex items-center gap-1 rounded-full border border-gris-medio px-4 py-2 text-sm font-medium text-gris-oscuro transition-colors hover:bg-gris-verde/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -479,10 +518,8 @@ export default function RegistrosTabla({ activo = true }: RegistrosTablaProps) {
           </button>
           <button
             type="button"
-            onClick={() =>
-              setPagina((actual) => Math.min(totalPaginas, actual + 1))
-            }
-            disabled={paginaActual >= totalPaginas || cargando}
+            onClick={() => setPagina((actual) => actual + 1)}
+            disabled={!hasMore || cargando}
             className="flex items-center gap-1 rounded-full border border-gris-medio px-4 py-2 text-sm font-medium text-gris-oscuro transition-colors hover:bg-gris-verde/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Siguiente

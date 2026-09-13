@@ -105,7 +105,7 @@ export default function ResumenGeneral({
   useEffect(() => {
     async function cargar() {
       try {
-        const pagina = await obtenerDiagnosticos({ limite: LIMITE_RESUMEN });
+        const pagina = await obtenerDiagnosticos({ tamanoPagina: LIMITE_RESUMEN });
         setRegistros(pagina.diagnosticos);
         setTotalReal(pagina.total);
       } catch (err) {

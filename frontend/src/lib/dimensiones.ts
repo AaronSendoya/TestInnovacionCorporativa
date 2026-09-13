@@ -114,3 +114,30 @@ export function fechaLocalYMD(fecha: Date): string {
   const dia = String(fecha.getDate()).padStart(2, "0");
   return `${anio}-${mes}-${dia}`;
 }
+
+// Lista fija de sectores (no se deriva de los datos): el formulario publico
+// la usa para el select, y el panel admin la reutiliza para el filtro por
+// sector sin depender de tener todos los diagnosticos cargados en memoria.
+export const SECTORES = [
+  "Agroindustria",
+  "Alimentos",
+  "Automotriz",
+  "Banca y Finanzas",
+  "Construcción",
+  "Educación",
+  "Energía",
+  "Gobierno / Sector Público",
+  "Inmobiliario",
+  "Logística",
+  "Manufactura",
+  "Minería",
+  "Retail",
+  "Salud",
+  "Seguros",
+  "Tecnología",
+  "Telecomunicaciones",
+  "Textil",
+  "Transporte",
+  "Turismo",
+  "Otro",
+];

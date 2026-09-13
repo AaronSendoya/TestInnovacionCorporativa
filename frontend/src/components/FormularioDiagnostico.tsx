@@ -25,6 +25,7 @@ import {
   type DiagnosticoResultado,
 } from "@/services/diagnostico";
 import PantallaCargaEnvio from "@/components/PantallaCargaEnvio";
+import { SECTORES } from "@/lib/dimensiones";
 import {
   AR,
   BO,
@@ -68,30 +69,6 @@ const CARGOS = [
   "Coordinador/a",
   "Analista",
   "Consultor/a",
-  "Otro",
-];
-
-const SECTORES = [
-  "Agroindustria",
-  "Alimentos",
-  "Automotriz",
-  "Banca y Finanzas",
-  "Construcción",
-  "Educación",
-  "Energía",
-  "Gobierno / Sector Público",
-  "Inmobiliario",
-  "Logística",
-  "Manufactura",
-  "Minería",
-  "Retail",
-  "Salud",
-  "Seguros",
-  "Tecnología",
-  "Telecomunicaciones",
-  "Textil",
-  "Transporte",
-  "Turismo",
   "Otro",
 ];
 

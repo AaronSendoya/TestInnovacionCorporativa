@@ -5,28 +5,29 @@ export interface DiagnosticoAdmin extends DiagnosticoResultado {
   creadoEn: string | null;
 }
 
-export interface CursorPagina {
-  creadoEn: string | null;
-  id: string;
-}
-
 export interface PaginaDiagnosticos {
   diagnosticos: DiagnosticoAdmin[];
   hasMore: boolean;
-  nextCursor: CursorPagina | null;
   total: number;
+  pagina: number;
 }
 
 interface ObtenerDiagnosticosParams {
-  limite: number;
+  pagina?: number;
+  tamanoPagina: number;
   busqueda?: string;
-  cursor?: CursorPagina | null;
+  sector?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
 }
 
 export async function obtenerDiagnosticos({
-  limite,
+  pagina = 1,
+  tamanoPagina,
   busqueda,
-  cursor,
+  sector,
+  fechaDesde,
+  fechaHasta,
 }: ObtenerDiagnosticosParams): Promise<PaginaDiagnosticos> {
   const usuario = auth.currentUser;
   if (!usuario) {
@@ -40,16 +41,14 @@ export async function obtenerDiagnosticos({
     throw new Error("No se pudo verificar tu sesión. Vuelve a iniciar sesión.");
   }
 
-  const params = new URLSearchParams({ limite: String(limite) });
-  if (busqueda) {
-    params.set("busqueda", busqueda);
-  }
-  if (cursor) {
-    params.set("cursorId", cursor.id);
-    if (cursor.creadoEn) {
-      params.set("cursorCreadoEn", cursor.creadoEn);
-    }
-  }
+  const params = new URLSearchParams({
+    pagina: String(pagina),
+    tamanoPagina: String(tamanoPagina),
+  });
+  if (busqueda) params.set("busqueda", busqueda);
+  if (sector) params.set("sector", sector);
+  if (fechaDesde) params.set("fechaDesde", fechaDesde);
+  if (fechaHasta) params.set("fechaHasta", fechaHasta);
 
   let response: Response;
   try {
@@ -72,8 +71,8 @@ export async function obtenerDiagnosticos({
   return {
     diagnosticos: Array.isArray(datos?.diagnosticos) ? datos.diagnosticos : [],
     hasMore: Boolean(datos?.hasMore),
-    nextCursor: datos?.nextCursor ?? null,
     total: Number(datos?.total) || 0,
+    pagina: Number(datos?.pagina) || 1,
   };
 }
 
